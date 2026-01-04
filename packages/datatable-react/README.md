@@ -6,7 +6,9 @@ A rich, enterprise-grade DataTable component for React, powered by [TanStack Tab
 
 - 🎨 **CSS Variables theming** - Customize appearance by simply defining CSS variables
 - 🔧 **TypeScript** - Full type safety out of the box
-- ⚡ **Lightweight** - Built with vanilla-extract for zero-runtime CSS-in-JS
+- 🔌 **Data Adapters** - Connect to Supabase, Firestore, Hasura, and more with zero boilerplate
+- 🧩 **Plugin System** - Add search panels, side panels, column customization with a single line
+- 📄 **Pagination built-in** - Both offset-based and cursor-based pagination supported
 
 ## Installation
 
@@ -132,6 +134,62 @@ function CustomTable<TData>({ data, columns }: { data: TData[]; columns: ColumnD
 }
 ```
 
+## Data Adapters
+
+Connect your DataTable to any backend with minimal setup. Sorting, filtering, and pagination are handled automatically by the adapter.
+
+```tsx
+import { SupabaseAdapter } from "@izumisy/seizen-datatable-adapter-supabase";
+
+const adapter = SupabaseAdapter.configure({
+  client: supabase,
+  table: "users",
+});
+
+function UsersTable() {
+  const { state } = useAdapter(adapter);
+  return <DataTable data={state.data} columns={columns} />;
+}
+```
+
+**Planned Adapters:**
+- Supabase Database
+- Supabase pg_graphql
+- Hasura GraphQL
+- Firebase Firestore
+
+## Plugins
+
+Enhance your DataTable with pre-built UI components. Add powerful features without writing complex code.
+
+```tsx
+import { SearchPanel } from "@izumisy/seizen-datatable-plugin-search";
+import { SidePanel } from "@izumisy/seizen-datatable-plugin-sidepanel";
+
+<DataTable
+  data={data}
+  columns={columns}
+  plugins={[
+    SearchPanel.configure({ searchableColumns: ["name", "email"] }),
+    SidePanel.configure({ render: (row) => <UserDetail user={row} /> }),
+  ]}
+/>
+```
+
+**Planned Plugins:**
+- **SearchPanel** - Global search with advanced filtering
+- **SidePanel** - Row details in a slide-out panel
+- **SheetView** - Tab-based views like spreadsheets
+- **ColumnCustomizer** - Show/hide and reorder columns
+
 ## License
 
 MIT
+
+---
+
+## Learn More
+
+- [Architecture & Design](./DESIGN.md)
+- [Data Adapters](./docs/data-adapter.md)
+- [Plugin System](./docs/plugin.md)
