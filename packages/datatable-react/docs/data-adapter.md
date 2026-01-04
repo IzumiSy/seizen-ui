@@ -21,7 +21,53 @@ interface DataAdapterOptions<TData, TFilter = unknown> {
    * Initial filter state
    */
   initialFilter?: TFilter;
+
+  /**
+   * Pagination mode
+   * - "offset": Traditional page-based (page index + page size)
+   * - "cursor": Cursor-based (first/after, last/before)
+   * @default "offset"
+   */
+  paginationMode?: "offset" | "cursor";
 }
+
+interface OffsetPaginationState {
+  mode: "offset";
+  /**
+   * Current page index (0-based)
+   */
+  pageIndex: number;
+  /**
+   * Current page size
+   */
+  pageSize: number;
+}
+
+interface CursorPaginationState {
+  mode: "cursor";
+  /**
+   * Current page size
+   */
+  pageSize: number;
+  /**
+   * Start cursor of current page
+   */
+  startCursor: string | null;
+  /**
+   * End cursor of current page
+   */
+  endCursor: string | null;
+  /**
+   * Whether there is a next page
+   */
+  hasNextPage: boolean;
+  /**
+   * Whether there is a previous page
+   */
+  hasPreviousPage: boolean;
+}
+
+type PaginationState = OffsetPaginationState | CursorPaginationState;
 
 interface DataAdapterState<TData> {
   /**
@@ -31,8 +77,9 @@ interface DataAdapterState<TData> {
 
   /**
    * Total count of items (for pagination)
+   * Note: May be null for cursor-based pagination if not provided by the API
    */
-  totalCount: number;
+  totalCount: number | null;
 
   /**
    * Loading state
@@ -45,14 +92,9 @@ interface DataAdapterState<TData> {
   error: Error | null;
 
   /**
-   * Current page index (0-based)
+   * Pagination state (offset or cursor based)
    */
-  pageIndex: number;
-
-  /**
-   * Current page size
-   */
-  pageSize: number;
+  pagination: PaginationState;
 }
 
 interface DataAdapterActions<TFilter = unknown> {
@@ -67,9 +109,24 @@ interface DataAdapterActions<TFilter = unknown> {
   refetch: () => Promise<void>;
 
   /**
-   * Set page index
+   * Go to next page
+   * - Offset mode: increments pageIndex
+   * - Cursor mode: uses endCursor as "after"
    */
-  setPageIndex: (index: number) => void;
+  nextPage: () => void;
+
+  /**
+   * Go to previous page
+   * - Offset mode: decrements pageIndex
+   * - Cursor mode: uses startCursor as "before"
+   */
+  previousPage: () => void;
+
+  /**
+   * Go to specific page (offset mode only)
+   * @throws Error if called in cursor mode
+   */
+  goToPage: (index: number) => void;
 
   /**
    * Set page size
@@ -91,6 +148,17 @@ interface DataAdapter<TData, TFilter = unknown> {
   state: DataAdapterState<TData>;
   actions: DataAdapterActions<TFilter>;
 }
+```
+
+### Pagination Mode Comparison
+
+| Feature | Offset Mode | Cursor Mode |
+|---------|-------------|-------------|
+| Jump to page | ✅ `goToPage(n)` | ❌ Not supported |
+| Next/Previous | ✅ `nextPage()` / `previousPage()` | ✅ `nextPage()` / `previousPage()` |
+| Total count | ✅ Always available | ⚠️ May be null |
+| Performance | ⚠️ Slower on large datasets | ✅ Consistent performance |
+| Real-time data | ⚠️ May skip/duplicate on changes | ✅ Stable cursor position |
 ```
 
 ## Defining Custom Adapters
