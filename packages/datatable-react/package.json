@@ -2,14 +2,29 @@
   "name": "@izumisy/seizen-datatable-react",
   "version": "0.1.0",
   "description": "Rich datatable for serious applications",
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist"
+  ],
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "vite build",
+    "test": "vitest",
+    "type-check": "tsc"
   },
   "author": "IzumiSy",
   "license": "MIT",
   "peerDependencies": {
     "react": ">= 19",
     "react-dom": ">= 19"
+  },
+  "dependencies": {
+    "@tanstack/react-table": "^8.21.3"
   },
   "devDependencies": {
     "@types/react": "^19",
