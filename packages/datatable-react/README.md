@@ -50,28 +50,28 @@ Customize the appearance by defining CSS variables. All variables have sensible 
 ```css
 :root {
   /* Colors */
-  --sdt-color-text: #1f2937;
-  --sdt-color-bg: #ffffff;
-  --sdt-header-bg: #f9fafb;
-  --sdt-header-color: #6b7280;
-  --sdt-border-color: #e5e7eb;
-  --sdt-row-hover-bg: #f3f4f6;
-  --sdt-row-selected-bg: #eff6ff;
+  --szui-color-text: #1f2937;
+  --szui-color-bg: #ffffff;
+  --szui-header-bg: #f9fafb;
+  --szui-header-color: #6b7280;
+  --szui-border-color: #e5e7eb;
+  --szui-row-hover-bg: #f3f4f6;
+  --szui-row-selected-bg: #eff6ff;
 
   /* Typography */
-  --sdt-font-family: system-ui, -apple-system, sans-serif;
-  --sdt-font-size: 14px;
-  --sdt-line-height: 1.5;
-  --sdt-header-font-size: 12px;
-  --sdt-header-font-weight: 600;
+  --szui-font-family: system-ui, -apple-system, sans-serif;
+  --szui-font-size: 14px;
+  --szui-line-height: 1.5;
+  --szui-header-font-size: 12px;
+  --szui-header-font-weight: 600;
 
   /* Spacing */
-  --sdt-cell-padding-x: 12px;
-  --sdt-cell-padding-y: 10px;
+  --szui-cell-padding-x: 12px;
+  --szui-cell-padding-y: 10px;
 
   /* Border */
-  --sdt-border-width: 1px;
-  --sdt-border-radius: 8px;
+  --szui-border-width: 1px;
+  --szui-border-radius: 8px;
 }
 ```
 
@@ -80,13 +80,13 @@ Customize the appearance by defining CSS variables. All variables have sensible 
 ```css
 @media (prefers-color-scheme: dark) {
   :root {
-    --sdt-color-text: #f9fafb;
-    --sdt-color-bg: #111827;
-    --sdt-header-bg: #1f2937;
-    --sdt-header-color: #9ca3af;
-    --sdt-border-color: #374151;
-    --sdt-row-hover-bg: #374151;
-    --sdt-row-selected-bg: #1e3a5f;
+    --szui-color-text: #f9fafb;
+    --szui-color-bg: #111827;
+    --szui-header-bg: #1f2937;
+    --szui-header-color: #9ca3af;
+    --szui-border-color: #374151;
+    --szui-row-hover-bg: #374151;
+    --szui-row-selected-bg: #1e3a5f;
   }
 }
 ```

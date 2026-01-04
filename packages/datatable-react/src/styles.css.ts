@@ -5,8 +5,8 @@ import { style, globalStyle } from "@vanilla-extract/css";
  * Users can override these in their own CSS:
  *
  * :root {
- *   --sdt-header-bg: #1e293b;
- *   --sdt-header-color: #f1f5f9;
+ *   --szui-header-bg: #1e293b;
+ *   --szui-header-color: #f1f5f9;
  * }
  */
 
@@ -34,43 +34,43 @@ export const table = style({
   width: "100%",
   borderCollapse: "collapse",
   borderSpacing: 0,
-  fontFamily: `var(--sdt-font-family, ${fallback.fontFamily})`,
-  fontSize: `var(--sdt-font-size, ${fallback.fontSize})`,
-  lineHeight: `var(--sdt-line-height, ${fallback.lineHeight})`,
-  color: `var(--sdt-color-text, ${fallback.colorText})`,
-  backgroundColor: `var(--sdt-color-bg, ${fallback.colorBg})`,
-  border: `var(--sdt-border-width, ${fallback.borderWidth}) solid var(--sdt-border-color, ${fallback.borderColor})`,
-  borderRadius: `var(--sdt-border-radius, ${fallback.borderRadius})`,
+  fontFamily: `var(--szui-font-family, ${fallback.fontFamily})`,
+  fontSize: `var(--szui-font-size, ${fallback.fontSize})`,
+  lineHeight: `var(--szui-line-height, ${fallback.lineHeight})`,
+  color: `var(--szui-color-text, ${fallback.colorText})`,
+  backgroundColor: `var(--szui-color-bg, ${fallback.colorBg})`,
+  border: `var(--szui-border-width, ${fallback.borderWidth}) solid var(--szui-border-color, ${fallback.borderColor})`,
+  borderRadius: `var(--szui-border-radius, ${fallback.borderRadius})`,
   overflow: "hidden",
 });
 
 export const thead = style({
-  backgroundColor: `var(--sdt-header-bg, ${fallback.headerBg})`,
+  backgroundColor: `var(--szui-header-bg, ${fallback.headerBg})`,
 });
 
 export const th = style({
-  padding: `var(--sdt-cell-padding-y, ${fallback.cellPaddingY}) var(--sdt-cell-padding-x, ${fallback.cellPaddingX})`,
+  padding: `var(--szui-cell-padding-y, ${fallback.cellPaddingY}) var(--szui-cell-padding-x, ${fallback.cellPaddingX})`,
   textAlign: "left",
-  fontSize: `var(--sdt-header-font-size, ${fallback.headerFontSize})`,
-  fontWeight: `var(--sdt-header-font-weight, ${fallback.headerFontWeight})`,
-  color: `var(--sdt-header-color, ${fallback.headerColor})`,
+  fontSize: `var(--szui-header-font-size, ${fallback.headerFontSize})`,
+  fontWeight: `var(--szui-header-font-weight, ${fallback.headerFontWeight})`,
+  color: `var(--szui-header-color, ${fallback.headerColor})`,
   textTransform: "uppercase",
   letterSpacing: "0.05em",
-  borderBottom: `var(--sdt-border-width, ${fallback.borderWidth}) solid var(--sdt-border-color, ${fallback.borderColor})`,
+  borderBottom: `var(--szui-border-width, ${fallback.borderWidth}) solid var(--szui-border-color, ${fallback.borderColor})`,
 });
 
 export const td = style({
-  padding: `var(--sdt-cell-padding-y, ${fallback.cellPaddingY}) var(--sdt-cell-padding-x, ${fallback.cellPaddingX})`,
-  borderBottom: `var(--sdt-border-width, ${fallback.borderWidth}) solid var(--sdt-border-color, ${fallback.borderColor})`,
+  padding: `var(--szui-cell-padding-y, ${fallback.cellPaddingY}) var(--szui-cell-padding-x, ${fallback.cellPaddingX})`,
+  borderBottom: `var(--szui-border-width, ${fallback.borderWidth}) solid var(--szui-border-color, ${fallback.borderColor})`,
 });
 
 export const tr = style({
   selectors: {
     "&:hover": {
-      backgroundColor: `var(--sdt-row-hover-bg, ${fallback.rowHoverBg})`,
+      backgroundColor: `var(--szui-row-hover-bg, ${fallback.rowHoverBg})`,
     },
     '&[data-selected="true"]': {
-      backgroundColor: `var(--sdt-row-selected-bg, ${fallback.rowSelectedBg})`,
+      backgroundColor: `var(--szui-row-selected-bg, ${fallback.rowSelectedBg})`,
     },
   },
 });
