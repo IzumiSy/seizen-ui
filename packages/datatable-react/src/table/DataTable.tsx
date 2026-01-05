@@ -1,6 +1,7 @@
 import { flexRender } from "@tanstack/react-table";
 import type { DataTableInstance } from "./useDataTable";
 import { PluginRenderer } from "../plugin/Renderer";
+import { PluginContextProvider } from "../plugin/Context";
 import * as styles from "./styles.css";
 
 export interface DataTableProps<TData> {
@@ -28,65 +29,59 @@ export function DataTable<TData>({ table, className }: DataTableProps<TData>) {
     : styles.container;
 
   return (
-    <div className={containerClassName}>
-      {/* Left Sidepanel */}
-      <PluginRenderer
-        position="left-sider"
-        plugins={table.plugins}
-        activePluginId={table.openPluginId}
-        onActivePluginChange={(id) =>
-          id ? table.openPlugin(id) : table.closePlugin()
-        }
-      />
+    <PluginContextProvider table={table}>
+      <div className={containerClassName}>
+        {/* Left Sidepanel */}
+        <PluginRenderer position="left-sider" />
 
-      {/* Main Table */}
-      <div className={styles.tableWrapper}>
-        <table className={styles.table}>
-          <thead className={styles.thead}>
-            {tanstack.getHeaderGroups().map((headerGroup) => (
-              <tr key={headerGroup.id}>
-                {headerGroup.headers.map((header) => (
-                  <th key={header.id} className={styles.th}>
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
-                  </th>
-                ))}
-              </tr>
-            ))}
-          </thead>
-          <tbody>
-            {tanstack.getRowModel().rows.map((row) => (
-              <tr
-                key={row.id}
-                className={styles.tr}
-                data-selected={row.getIsSelected() || undefined}
-                onClick={() => onRowClick?.(row.original)}
-                style={onRowClick ? { cursor: "pointer" } : undefined}
-              >
-                {row.getVisibleCells().map((cell) => (
-                  <td key={cell.id} className={styles.td}>
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </td>
-                ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        {/* Main Table */}
+        <div className={styles.tableWrapper}>
+          <table className={styles.table}>
+            <thead className={styles.thead}>
+              {tanstack.getHeaderGroups().map((headerGroup) => (
+                <tr key={headerGroup.id}>
+                  {headerGroup.headers.map((header) => (
+                    <th key={header.id} className={styles.th}>
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(
+                            header.column.columnDef.header,
+                            header.getContext()
+                          )}
+                    </th>
+                  ))}
+                </tr>
+              ))}
+            </thead>
+            <tbody>
+              {tanstack.getRowModel().rows.map((row) => (
+                <tr
+                  key={row.id}
+                  className={styles.tr}
+                  data-selected={row.getIsSelected() || undefined}
+                  onClick={() => {
+                    table.eventBus.emit("row-click", row.original);
+                    onRowClick?.(row.original);
+                  }}
+                  style={onRowClick ? { cursor: "pointer" } : undefined}
+                >
+                  {row.getVisibleCells().map((cell) => (
+                    <td key={cell.id} className={styles.td}>
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext()
+                      )}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Right Sidepanel */}
+        <PluginRenderer position="right-sider" />
       </div>
-
-      {/* Right Sidepanel */}
-      <PluginRenderer
-        position="right-sider"
-        plugins={table.plugins}
-        activePluginId={table.openPluginId}
-        onActivePluginChange={(id) =>
-          id ? table.openPlugin(id) : table.closePlugin()
-        }
-      />
-    </div>
+    </PluginContextProvider>
   );
 }

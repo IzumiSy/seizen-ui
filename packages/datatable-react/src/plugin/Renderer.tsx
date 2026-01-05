@@ -4,6 +4,7 @@ import type {
   PluginPosition,
   SidepanelPlugin,
 } from "./definePlugin";
+import { usePluginContext } from "./Context";
 import * as styles from "./styles.css";
 
 interface PluginRendererProps {
@@ -11,21 +12,6 @@ interface PluginRendererProps {
    * Plugin position to render
    */
   position: PluginPosition;
-
-  /**
-   * Plugins to render
-   */
-  plugins: DataTablePlugin<any>[];
-
-  /**
-   * Currently active plugin ID
-   */
-  activePluginId: string | null;
-
-  /**
-   * Callback when active plugin changes
-   */
-  onActivePluginChange: (pluginId: string | null) => void;
 }
 
 /**
@@ -40,12 +26,11 @@ function isSidepanelPlugin(
 /**
  * Renders plugins for a specific position
  */
-export function PluginRenderer({
-  position,
-  plugins,
-  activePluginId,
-  onActivePluginChange,
-}: PluginRendererProps) {
+export function PluginRenderer({ position }: PluginRendererProps) {
+  const { table } = usePluginContext();
+  const plugins = table.plugins;
+  const activePluginId = table.plugin.getActiveId();
+  const setActive = table.plugin.setActive;
   // Filter plugins by position
   const sidepanelPlugins = plugins.filter(
     (p) => isSidepanelPlugin(p) && p.position === position
@@ -79,9 +64,7 @@ export function PluginRenderer({
             className={styles.sidepanelTab}
             data-active={activePluginId === plugin.id || undefined}
             onClick={() =>
-              onActivePluginChange(
-                activePluginId === plugin.id ? null : plugin.id
-              )
+              setActive(activePluginId === plugin.id ? null : plugin.id)
             }
           >
             <span className={styles.sidepanelTabLabel}>{plugin.name}</span>
@@ -108,7 +91,7 @@ export function PluginRenderer({
             </div>
             <button
               className={styles.sidepanelCloseButton}
-              onClick={() => onActivePluginChange(null)}
+              onClick={() => setActive(null)}
               aria-label="Close"
             >
               ×

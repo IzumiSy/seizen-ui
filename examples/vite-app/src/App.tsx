@@ -4,7 +4,11 @@ import {
   type ColumnDef,
 } from "@izumisy/seizen-datatable-react";
 import { RowDetailPlugin } from "./plugins/RowDetailPlugin";
-import { setSelectedRowForDetail } from "./plugins/rowDetailState";
+import {
+  FileExportPlugin,
+  CsvExporter,
+  JsonlExporter,
+} from "./plugins/FileExportPlugin";
 
 type Person = {
   id: number;
@@ -74,10 +78,15 @@ function App() {
       RowDetailPlugin.configure({
         width: 350,
       }),
+      FileExportPlugin.configure({
+        width: 300,
+        filename: "users",
+        includeHeaders: true,
+        exporters: [CsvExporter, JsonlExporter],
+      }),
     ],
     onRowClick: (row) => {
-      setSelectedRowForDetail(row);
-      table.openPlugin("row-detail");
+      table.plugin.open("row-detail", { row });
     },
   });
 

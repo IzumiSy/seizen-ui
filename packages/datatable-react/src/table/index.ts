@@ -9,6 +9,13 @@ export type {
   UseDataTableOptions,
 } from "./useDataTable";
 
+// Event types (re-export from plugin)
+export type {
+  DataTableEventMap,
+  DataTableEventName,
+  EventBus,
+} from "../plugin/useEventBus";
+
 // Re-export useful types from TanStack Table
 export type {
   ColumnDef,

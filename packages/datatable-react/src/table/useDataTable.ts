@@ -13,6 +13,11 @@ import {
   type Table,
 } from "@tanstack/react-table";
 import type { DataTablePlugin } from "../plugin";
+import { useEventBus, type EventBus } from "../plugin/useEventBus";
+import {
+  usePluginControl,
+  type PluginControl,
+} from "../plugin/usePluginControl";
 
 // =============================================================================
 // Column Types
@@ -45,40 +50,158 @@ export interface UseDataTableOptions<TData> {
  * DataTable instance returned by useDataTable
  */
 export interface DataTableInstance<TData> {
+  // ===========================================================================
   // Selection
+  // ===========================================================================
+
+  /**
+   * Get the currently selected rows.
+   * @returns Array of selected row data
+   */
   getSelectedRows: () => TData[];
+
+  /**
+   * Set the selected rows programmatically.
+   * @param rows - Array of row data to select
+   */
   setSelectedRows: (rows: TData[]) => void;
+
+  /**
+   * Clear all row selections.
+   */
   clearSelection: () => void;
 
+  // ===========================================================================
   // Filtering
+  // ===========================================================================
+
+  /**
+   * Get the current column filter state.
+   * @returns Array of column filters
+   */
   getFilterState: () => ColumnFiltersState;
+
+  /**
+   * Set column filters programmatically.
+   * @param filter - Column filter state to apply
+   */
   setFilter: (filter: ColumnFiltersState) => void;
+
+  /**
+   * Get the current global filter value.
+   * @returns Global filter string
+   */
   getGlobalFilter: () => string;
+
+  /**
+   * Set the global filter value.
+   * @param value - Filter string to apply across all columns
+   */
   setGlobalFilter: (value: string) => void;
 
+  // ===========================================================================
   // Sorting
+  // ===========================================================================
+
+  /**
+   * Get the current sorting state.
+   * @returns Array of sorting configurations
+   */
   getSortingState: () => SortingState;
+
+  /**
+   * Set sorting programmatically.
+   * @param sorting - Sorting state to apply
+   */
   setSorting: (sorting: SortingState) => void;
 
+  // ===========================================================================
   // Pagination
+  // ===========================================================================
+
+  /**
+   * Get the current pagination state.
+   * @returns Pagination state including pageIndex and pageSize
+   */
   getPaginationState: () => PaginationState;
+
+  /**
+   * Set the current page index (0-based).
+   * @param index - Page index to navigate to
+   */
   setPageIndex: (index: number) => void;
+
+  /**
+   * Set the number of rows per page.
+   * @param size - Number of rows to display per page
+   */
   setPageSize: (size: number) => void;
 
+  // ===========================================================================
   // Data
+  // ===========================================================================
+
+  /**
+   * Get the current table data.
+   * @returns Array of row data
+   */
   getData: () => TData[];
 
-  // Plugins
-  /** Plugins registered with this table */
-  plugins: DataTablePlugin<any>[];
-  openPluginId: string | null;
-  openPlugin: (pluginId: string) => void;
-  closePlugin: () => void;
+  /**
+   * Get the column definitions.
+   * @returns Array of column definitions
+   */
+  getColumns: () => DataTableColumn<TData>[];
 
-  // Row click handler
+  // ===========================================================================
+  // Plugins
+  // ===========================================================================
+
+  /**
+   * Plugins registered with this table.
+   */
+  plugins: DataTablePlugin<any>[];
+
+  /**
+   * Plugin control interface.
+   */
+  plugin: PluginControl;
+
+  // ===========================================================================
+  // Row Click
+  // ===========================================================================
+
+  /**
+   * Callback invoked when a row is clicked.
+   * Configured via useDataTable options.
+   */
   onRowClick?: (row: TData) => void;
 
-  // TanStack Table instance (for advanced usage)
+  // ===========================================================================
+  // Event Bus
+  // ===========================================================================
+
+  /**
+   * Event bus for plugin communication.
+   * Use this to emit custom events that plugins can subscribe to.
+   *
+   * @example
+   * ```tsx
+   * // Emit a custom event
+   * table.eventBus.emit("my-custom-event", { data: "value" });
+   * ```
+   */
+  eventBus: EventBus;
+
+  // ===========================================================================
+  // Advanced
+  // ===========================================================================
+
+  /**
+   * The underlying TanStack Table instance.
+   * Use this for advanced operations not exposed by DataTableInstance.
+   * @internal
+   */
   _tanstackTable: Table<TData>;
 }
 
@@ -105,7 +228,12 @@ export function useDataTable<TData>({
     pageIndex: 0,
     pageSize: 10,
   });
-  const [openPluginId, setOpenPluginId] = useState<string | null>(null);
+
+  // Plugin control
+  const plugin = usePluginControl();
+
+  // Event bus for plugin communication
+  const eventBus = useEventBus();
 
   // Handle selection change callback
   const handleRowSelectionChange = useCallback(
@@ -189,15 +317,17 @@ export function useDataTable<TData>({
 
       // Data
       getData: () => data,
+      getColumns: () => columns,
 
       // Plugins
       plugins,
-      openPluginId,
-      openPlugin: (pluginId: string) => setOpenPluginId(pluginId),
-      closePlugin: () => setOpenPluginId(null),
+      plugin,
 
       // Row click handler
       onRowClick,
+
+      // Event bus
+      eventBus,
 
       // TanStack Table instance for advanced usage
       _tanstackTable: tanstackTable,
@@ -210,8 +340,9 @@ export function useDataTable<TData>({
     globalFilter,
     sorting,
     pagination,
-    openPluginId,
+    plugin,
     onRowClick,
+    eventBus,
   ]);
 
   // Notify selection changes

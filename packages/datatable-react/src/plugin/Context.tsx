@@ -1,0 +1,238 @@
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useRef,
+  type ReactNode,
+} from "react";
+import type { DataTableInstance } from "../table/useDataTable";
+import type { DataTableEventMap, DataTableEventName } from "./useEventBus";
+
+// =============================================================================
+// Types
+// =============================================================================
+
+/**
+ * Column info for plugins (simplified from ColumnDef)
+ */
+export interface PluginColumnInfo {
+  /** Column accessor key */
+  key: string;
+  /** Column header text */
+  header: string;
+}
+
+/**
+ * Plugin context value available to all plugins
+ */
+export interface PluginContextValue<TData = unknown> {
+  /**
+   * The DataTable instance
+   */
+  table: DataTableInstance<TData>;
+
+  /**
+   * Current table data
+   */
+  data: TData[];
+
+  /**
+   * Column information (key and header)
+   */
+  columns: PluginColumnInfo[];
+
+  /**
+   * Currently selected rows
+   */
+  selectedRows: TData[];
+
+  /**
+   * Arguments passed to openPlugin() when the plugin was opened.
+   * Use this to receive initial data when the plugin mounts.
+   *
+   * @example
+   * ```tsx
+   * // Application opens plugin with args:
+   * table.openPlugin("row-detail", { row: clickedRow });
+   *
+   * // Plugin receives args:
+   * const { openArgs } = usePluginContext();
+   * const initialRow = (openArgs as { row: Person })?.row;
+   * ```
+   */
+  openArgs: unknown;
+
+  /**
+   * Hook to subscribe to events emitted by DataTable.
+   *
+   * Built-in events:
+   * - `data-change`: Table data changed
+   * - `selection-change`: Row selection changed
+   * - `filter-change`: Column filters changed
+   * - `sorting-change`: Sorting changed
+   * - `pagination-change`: Pagination changed
+   * - `row-click`: A row was clicked
+   *
+   * @example
+   * ```tsx
+   * const { useOnEvent } = usePluginContext();
+   *
+   * // Subscribe to selection changes
+   * useOnEvent("selection-change", (selectedRows) => {
+   *   console.log("Selection changed:", selectedRows);
+   * });
+   *
+   * // Subscribe to row clicks
+   * useOnEvent("row-click", (row) => {
+   *   console.log("Row clicked:", row);
+   * });
+   * ```
+   */
+  useOnEvent: <K extends DataTableEventName | (string & {})>(
+    event: K,
+    callback: (
+      payload: K extends DataTableEventName ? DataTableEventMap[K] : unknown
+    ) => void
+  ) => void;
+}
+
+// =============================================================================
+// Context
+// =============================================================================
+
+const PluginContext = createContext<PluginContextValue<any> | null>(null);
+
+// =============================================================================
+// Provider
+// =============================================================================
+
+export interface PluginContextProviderProps<TData> {
+  table: DataTableInstance<TData>;
+  children: ReactNode;
+}
+
+/**
+ * Provider component that makes table context available to plugins
+ */
+export function PluginContextProvider<TData>({
+  table,
+  children,
+}: PluginContextProviderProps<TData>) {
+  const data = table.getData();
+  const selectedRows = table.getSelectedRows();
+  const filterState = table.getFilterState();
+  const sortingState = table.getSortingState();
+  const paginationState = table.getPaginationState();
+
+  // Convert columns to simplified PluginColumnInfo
+  const columns: PluginColumnInfo[] = table.getColumns().map((col) => {
+    const accessorKey =
+      "accessorKey" in col ? (col.accessorKey as string) : col.id ?? "";
+    const header = typeof col.header === "string" ? col.header : accessorKey;
+    return { key: accessorKey, header };
+  });
+
+  // Store previous values for change detection and emit events
+  const prevDataRef = useRef(data);
+  const prevSelectionRef = useRef(selectedRows);
+  const prevFilterRef = useRef(filterState);
+  const prevSortingRef = useRef(sortingState);
+  const prevPaginationRef = useRef(paginationState);
+
+  // Emit events when values change
+  useEffect(() => {
+    if (prevDataRef.current !== data) {
+      prevDataRef.current = data;
+      table.eventBus.emit("data-change", data);
+    }
+  }, [data, table.eventBus]);
+
+  useEffect(() => {
+    if (prevSelectionRef.current !== selectedRows) {
+      prevSelectionRef.current = selectedRows;
+      table.eventBus.emit("selection-change", selectedRows);
+    }
+  }, [selectedRows, table.eventBus]);
+
+  useEffect(() => {
+    if (prevFilterRef.current !== filterState) {
+      prevFilterRef.current = filterState;
+      table.eventBus.emit("filter-change", filterState);
+    }
+  }, [filterState, table.eventBus]);
+
+  useEffect(() => {
+    if (prevSortingRef.current !== sortingState) {
+      prevSortingRef.current = sortingState;
+      table.eventBus.emit("sorting-change", sortingState);
+    }
+  }, [sortingState, table.eventBus]);
+
+  useEffect(() => {
+    if (prevPaginationRef.current !== paginationState) {
+      prevPaginationRef.current = paginationState;
+      table.eventBus.emit("pagination-change", paginationState);
+    }
+  }, [paginationState, table.eventBus]);
+
+  // useOnEvent hook factory
+  const useOnEvent = <K extends DataTableEventName | (string & {})>(
+    event: K,
+    callback: (
+      payload: K extends DataTableEventName ? DataTableEventMap[K] : unknown
+    ) => void
+  ) => {
+    useEffect(() => {
+      return table.eventBus.subscribe(
+        event,
+        callback as (payload: unknown) => void
+      );
+    }, [event, callback]);
+  };
+
+  const contextValue: PluginContextValue<TData> = {
+    table,
+    data,
+    columns,
+    selectedRows,
+    openArgs: table.plugin._state.args,
+    useOnEvent,
+  };
+
+  return (
+    <PluginContext.Provider value={contextValue}>
+      {children}
+    </PluginContext.Provider>
+  );
+}
+
+// =============================================================================
+// Hook
+// =============================================================================
+
+/**
+ * Hook to access table context from within a plugin component.
+ *
+ * @example
+ * ```tsx
+ * function MyPluginComponent() {
+ *   const { table, data, selectedRows, useOnEvent } = usePluginContext();
+ *
+ *   useOnEvent("selection-change", (rows) => {
+ *     console.log("Selection changed:", rows);
+ *   });
+ *
+ *   return <div>Total rows: {data.length}</div>;
+ * }
+ * ```
+ */
+export function usePluginContext<TData = unknown>(): PluginContextValue<TData> {
+  const context = useContext(PluginContext);
+  if (!context) {
+    throw new Error(
+      "usePluginContext must be used within a DataTable component. " +
+        "Make sure your plugin is rendered inside a DataTable."
+    );
+  }
+  return context as PluginContextValue<TData>;
+}

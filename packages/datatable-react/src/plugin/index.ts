@@ -26,3 +26,15 @@ export type {
   ContextMenuItemContext,
   ContextMenuItemFactory,
 } from "./contextMenuItem";
+
+// PluginContext
+export { usePluginContext, PluginContextProvider } from "./Context";
+export type { PluginContextValue, PluginColumnInfo } from "./Context";
+
+// Event types
+export { useEventBus } from "./useEventBus";
+export type {
+  DataTableEventMap,
+  DataTableEventName,
+  EventBus,
+} from "./useEventBus";

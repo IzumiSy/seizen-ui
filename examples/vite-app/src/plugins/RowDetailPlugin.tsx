@@ -1,13 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { z } from "zod";
 import {
   definePlugin,
+  usePluginContext,
   type PluginContext,
 } from "@izumisy/seizen-datatable-react/plugin";
-import {
-  getSelectedRowForDetail,
-  subscribeToSelectedRow,
-} from "./rowDetailState";
 
 /**
  * Schema for RowDetail plugin configuration
@@ -19,16 +16,6 @@ const RowDetailSchema = z.object({
 
 type RowDetailConfig = z.infer<typeof RowDetailSchema>;
 
-function useSelectedRowForDetail<T>(): T | null {
-  const [row, setRow] = useState<T | null>(getSelectedRowForDetail);
-
-  useEffect(() => {
-    return subscribeToSelectedRow(() => setRow(getSelectedRowForDetail()));
-  }, []);
-
-  return row;
-}
-
 /**
  * RowDetailRenderer - Creates the render function for the plugin
  */
@@ -36,7 +23,15 @@ function RowDetailRenderer(context: PluginContext<RowDetailConfig>) {
   const { args } = context;
 
   return function RowDetailPanel() {
-    const selectedRow = useSelectedRowForDetail();
+    const { openArgs, useOnEvent } = usePluginContext();
+    // Initialize with openArgs (for first click) or null
+    const initialRow = (openArgs as { row: unknown } | undefined)?.row ?? null;
+    const [selectedRow, setSelectedRow] = useState<unknown>(initialRow);
+
+    // Subscribe to row-click events for subsequent clicks while panel is open
+    useOnEvent("row-click", (row: unknown) => {
+      setSelectedRow(row);
+    });
 
     if (!selectedRow) {
       return (
@@ -117,21 +112,21 @@ function formatValue(value: unknown): string {
  * RowDetail Plugin
  *
  * Displays detailed information about a clicked row in a sidepanel.
+ * Uses openArgs to receive the initial row data, and EventBus for
+ * subsequent row clicks while the panel is open.
  *
  * @example
  * ```tsx
  * import { RowDetailPlugin } from "./plugins/RowDetailPlugin";
- * import { setSelectedRowForDetail } from "./plugins/rowDetailState";
  *
- * // In your DataTable setup:
  * const table = useDataTable({
  *   data,
  *   columns,
- *   plugins: [RowDetailPlugin.configure({ title: "User Details" })],
+ *   plugins: [RowDetailPlugin.configure({ width: 350 })],
+ *   onRowClick: (row) => {
+ *     table.openPlugin("row-detail", { row });
+ *   },
  * });
- *
- * // Handle row clicks:
- * <DataTable table={table} onRowClick={(row) => setSelectedRowForDetail(row)} />
  * ```
  */
 export const RowDetailPlugin = definePlugin({
