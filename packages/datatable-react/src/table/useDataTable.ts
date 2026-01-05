@@ -10,6 +10,7 @@ import {
   type SortingState,
   type ColumnFiltersState,
   type PaginationState,
+  type VisibilityState,
   type Table,
 } from "@tanstack/react-table";
 import type { DataTablePlugin } from "../plugin";
@@ -150,6 +151,28 @@ export interface DataTableInstance<TData> {
   getColumns: () => DataTableColumn<TData>[];
 
   // ===========================================================================
+  // Column Visibility
+  // ===========================================================================
+
+  /**
+   * Get the current column visibility state.
+   * @returns Object mapping column IDs to visibility (true = visible)
+   */
+  getColumnVisibility: () => VisibilityState;
+
+  /**
+   * Set column visibility state.
+   * @param visibility - Object mapping column IDs to visibility
+   */
+  setColumnVisibility: (visibility: VisibilityState) => void;
+
+  /**
+   * Toggle visibility of a specific column.
+   * @param columnId - The column ID to toggle
+   */
+  toggleColumnVisibility: (columnId: string) => void;
+
+  // ===========================================================================
   // Plugins
   // ===========================================================================
 
@@ -213,6 +236,7 @@ export function useDataTable<TData>({
     pageIndex: 0,
     pageSize: 10,
   });
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
 
   // Plugin control
   const plugin = usePluginControl();
@@ -246,6 +270,7 @@ export function useDataTable<TData>({
       columnFilters,
       globalFilter,
       pagination,
+      columnVisibility,
     },
     enableRowSelection: true,
     enableMultiRowSelection: enableMultiSelect,
@@ -254,6 +279,7 @@ export function useDataTable<TData>({
     onColumnFiltersChange: setColumnFilters,
     onGlobalFilterChange: setGlobalFilter,
     onPaginationChange: setPagination,
+    onColumnVisibilityChange: setColumnVisibility,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getSortedRowModel: getSortedRowModel(),
@@ -304,6 +330,16 @@ export function useDataTable<TData>({
       getData: () => data,
       getColumns: () => columns,
 
+      // Column Visibility
+      getColumnVisibility: () => columnVisibility,
+      setColumnVisibility,
+      toggleColumnVisibility: (columnId: string) => {
+        setColumnVisibility((prev) => ({
+          ...prev,
+          [columnId]: prev[columnId] === false ? true : false,
+        }));
+      },
+
       // Plugins
       plugins,
       plugin,
@@ -322,6 +358,7 @@ export function useDataTable<TData>({
     globalFilter,
     sorting,
     pagination,
+    columnVisibility,
     plugin,
     eventBus,
   ]);

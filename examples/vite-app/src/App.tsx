@@ -11,6 +11,7 @@ import {
   JsonlExporter,
   TsvExporter,
 } from "./plugins/FileExportPlugin";
+import { ColumnControlPlugin } from "./plugins/ColumnControlPlugin";
 
 type Person = {
   id: number;
@@ -79,6 +80,9 @@ function App() {
     plugins: [
       RowDetailPlugin.configure({
         width: 450,
+      }),
+      ColumnControlPlugin.configure({
+        width: 400,
       }),
       FileExportPlugin.configure({
         width: 450,
