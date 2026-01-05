@@ -7,7 +7,10 @@ import type { ContextMenuItemFactory } from "./contextMenuItem";
 // =============================================================================
 
 /**
- * Plugin position in the DataTable layout
+ * Plugin position in the DataTable layout.
+ *
+ * - `left-sider`: IDE-style vertical tab on the left side. Ideal for navigation, tree views.
+ * - `right-sider`: IDE-style vertical tab on the right side. Ideal for details, inspectors.
  */
 export type PluginPosition = "left-sider" | "right-sider";
 
@@ -54,6 +57,7 @@ export type DataTablePlugin<TData = unknown> =
  * Context passed to plugin render function
  */
 export interface PluginContext<TArgs> {
+  /** Validated configuration from args schema */
   args: TArgs;
 }
 
@@ -61,8 +65,11 @@ export interface PluginContext<TArgs> {
  * Base options shared by all plugin types
  */
 interface BasePluginOptions<TSchema extends z.ZodType> {
+  /** Unique plugin identifier */
   id: string;
+  /** Plugin display name (used as vertical tab label for sidepanel plugins) */
   name: string;
+  /** Zod schema for configuration validation */
   args: TSchema;
 }
 
@@ -71,8 +78,11 @@ interface BasePluginOptions<TSchema extends z.ZodType> {
  */
 export interface DefineSidepanelPluginOptions<TData, TSchema extends z.ZodType>
   extends BasePluginOptions<TSchema> {
+  /** Plugin position in the DataTable layout */
   position: PluginPosition;
+  /** Render function that receives context with validated args and returns a React component */
   render: (context: PluginContext<z.infer<TSchema>>) => () => ReactNode;
+  /** Optional context menu configuration */
   contextMenu?: {
     items: ContextMenuItemFactory<TData, z.infer<TSchema>>[];
   };
@@ -95,7 +105,80 @@ export type DefinePluginOptions<TData, TSchema extends z.ZodType> =
   | DefineContextMenuPluginOptions<TData, TSchema>;
 
 /**
- * Define a plugin with type-safe configuration
+ * Define a plugin with type-safe configuration.
+ *
+ * This function creates a plugin factory with a `configure` method that validates
+ * configuration at runtime using the provided Zod schema.
+ *
+ * @example Sidepanel Plugin
+ * ```tsx
+ * import { z } from "zod";
+ * import { definePlugin, contextMenuItem, usePluginContext } from "@izumisy/seizen-datatable-react/plugin";
+ *
+ * const BulkActionsSchema = z.object({
+ *   enableDelete: z.boolean().default(true),
+ *   enableExport: z.boolean().default(true),
+ * });
+ *
+ * function BulkActionsRenderer(context: PluginContext<z.infer<typeof BulkActionsSchema>>) {
+ *   const { args } = context;
+ *   return function Render() {
+ *     const { selectedRows, useOnChange } = usePluginContext();
+ *     useOnChange("selection", (selection) => {
+ *       console.log("Selection changed:", selection);
+ *     });
+ *     if (selectedRows.length === 0) return null;
+ *     return (
+ *       <div className="bulk-actions">
+ *         <span>{selectedRows.length} selected</span>
+ *         {args.enableDelete && <button>Delete</button>}
+ *         {args.enableExport && <button>Export</button>}
+ *       </div>
+ *     );
+ *   };
+ * }
+ *
+ * const BulkActions = definePlugin({
+ *   id: "bulk-actions",
+ *   name: "Bulk Actions",
+ *   position: "right-sider",
+ *   args: BulkActionsSchema,
+ *   render: BulkActionsRenderer,
+ *   contextMenu: {
+ *     items: [
+ *       contextMenuItem("delete", (ctx) => ({
+ *         label: `Delete ${ctx.selectedRows.length} items`,
+ *         onClick: () => handleDelete(ctx.selectedRows),
+ *         visible: ctx.pluginArgs.enableDelete,
+ *       })),
+ *     ],
+ *   },
+ * });
+ *
+ * // Usage
+ * <DataTable plugins={[BulkActions.configure({ enableDelete: true })]} />
+ * ```
+ *
+ * @example Context Menu Only Plugin
+ * ```tsx
+ * const RowActions = definePlugin({
+ *   id: "row-actions",
+ *   name: "Row Actions",
+ *   args: z.object({
+ *     enableCopyId: z.boolean().default(true),
+ *   }),
+ *   // No position or render - context menu only
+ *   contextMenu: {
+ *     items: [
+ *       contextMenuItem("copy-id", (ctx) => ({
+ *         label: "Copy ID",
+ *         onClick: () => navigator.clipboard.writeText(ctx.row.id),
+ *         visible: ctx.pluginArgs.enableCopyId,
+ *       })),
+ *     ],
+ *   },
+ * });
+ * ```
  */
 export function definePlugin<TData, TSchema extends z.ZodType>(
   options: DefinePluginOptions<TData, TSchema>
