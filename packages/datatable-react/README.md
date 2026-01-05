@@ -9,6 +9,7 @@ A rich, enterprise-grade DataTable component for React, powered by [TanStack Tab
 - 🔌 **Data Adapters** - Connect to Supabase, Firestore, Hasura, and more with zero boilerplate
 - 🧩 **Plugin System** - Add search panels, side panels, column customization with a single line
 - 📄 **Pagination built-in** - Both offset-based and cursor-based pagination supported
+- 📡 **Event Bus** - Subscribe to table events and plugin-defined custom events
 
 ## Installation
 
@@ -235,6 +236,69 @@ function UsersTable() {
 - **RowDetail** - Row details in a sidepanel
 - **FilterBuilder** - Advanced filtering UI
 - **ColumnCustomizer** - Show/hide and reorder columns
+
+## Event Bus
+
+DataTable provides a built-in event bus for subscribing to table state changes and row interactions. Use `useDataTableEvent` to listen to events from your application code.
+
+### Built-in Events
+
+| Event Name | Payload | Description |
+|------------|---------|-------------|
+| `data-change` | `TData[]` | Emitted when table data changes |
+| `selection-change` | `TData[]` | Emitted when row selection changes |
+| `filter-change` | `ColumnFiltersState` | Emitted when column filters change |
+| `sorting-change` | `SortingState` | Emitted when sorting changes |
+| `pagination-change` | `PaginationState` | Emitted when pagination changes |
+| `row-click` | `TData` | Emitted when a table row is clicked |
+
+### Subscribing to Events
+
+```tsx
+import { useDataTable, DataTable, useDataTableEvent } from "@izumisy/seizen-datatable-react";
+
+function App() {
+  const table = useDataTable({ data, columns });
+
+  // Subscribe to row-click events
+  useDataTableEvent(table, "row-click", (row) => {
+    console.log("Row clicked:", row);
+  });
+
+  // Subscribe to selection changes
+  useDataTableEvent(table, "selection-change", (selectedRows) => {
+    console.log("Selection changed:", selectedRows);
+  });
+
+  return <DataTable table={table} />;
+}
+```
+
+### Custom Events
+
+Plugins can define custom events with full type safety using module augmentation. Application code can also subscribe to these plugin-defined events using `useDataTableEvent`, enabling seamless communication between plugins and the application layer.
+
+```tsx
+// Plugin defines custom events via module augmentation
+declare module "@izumisy/seizen-datatable-react/plugin" {
+  interface EventBusRegistry {
+    "my-plugin:action": { itemId: string; action: "create" | "delete" };
+    "my-plugin:complete": { success: boolean };
+  }
+}
+
+// Application code can subscribe to plugin events
+useDataTableEvent(table, "my-plugin:action", (payload) => {
+  // payload is typed as { itemId: string; action: "create" | "delete" }
+  console.log(`Plugin action: ${payload.action} on item ${payload.itemId}`);
+});
+
+useDataTableEvent(table, "my-plugin:complete", (payload) => {
+  if (payload.success) {
+    showNotification("Operation completed successfully");
+  }
+});
+```
 
 ## License
 
