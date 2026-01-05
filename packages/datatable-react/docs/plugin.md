@@ -96,72 +96,12 @@ import {
 
 There are two types of plugins:
 
-1. **Sidepanel Plugin** - Renders UI in a sidepanel and optionally adds context menu items
-2. **Context Menu Only Plugin** - Only adds items to the row context menu (no sidepanel UI)
+1. **Slot Plugin** - Renders UI in one or more slots (sidepanel, header, footer, cell, inlineRow)
+2. **Context Menu Only Plugin** - Only adds items to the row context menu (no slot UI)
 
-## Creating a Sidepanel Plugin
+## Creating a Slot Plugin
 
-Use `definePlugin` with `position` and `render` to create a sidepanel plugin.
-
-### Basic Structure
-
-```tsx
-import { z } from "zod";
-import {
-  definePlugin,
-  usePluginContext,
-  type PluginContext,
-} from "@izumisy/seizen-datatable-react/plugin";
-
-// 1. Define configuration schema with Zod
-const MyPluginSchema = z.object({
-  width: z.number().default(320),
-  title: z.string().default("My Plugin"),
-});
-
-type MyPluginConfig = z.infer<typeof MyPluginSchema>;
-
-// 2. Create the render function
-function MyPluginRenderer(context: PluginContext<MyPluginConfig>) {
-  const { args } = context; // args contains validated config
-
-  // Return a React component
-  return function MyPluginPanel() {
-    const { data, selectedRows, useEvent } = usePluginContext();
-
-    return (
-      <div style={{ width: args.width }}>
-        <h2>{args.title}</h2>
-        <p>Total rows: {data.length}</p>
-      </div>
-    );
-  };
-}
-
-// 3. Define the plugin
-export const MyPlugin = definePlugin({
-  id: "my-plugin",
-  name: "My Plugin",           // Tab label
-  position: "right-sider",     // or "left-sider"
-  args: MyPluginSchema,
-  header: "My Plugin Header",  // Panel header (optional)
-  render: MyPluginRenderer,
-});
-```
-
-### Using the Plugin
-
-```tsx
-<DataTable
-  data={data}
-  columns={columns}
-  plugins={[MyPlugin.configure({ width: 400, title: "Custom Title" })]}
-/>
-```
-
-## Creating a Slot-Based Plugin
-
-Use `definePlugin` with the `slots` option to create a plugin that uses multiple slots.
+Use `definePlugin` with the `slots` option to create a plugin that uses one or more slots.
 
 ### Basic Structure
 
@@ -279,7 +219,7 @@ The `id` in `openArgs` is matched against each row's `id` field to determine whi
 
 ## Creating a Context Menu Only Plugin
 
-Omit `position` and `render` to create a plugin that only adds context menu items.
+Omit `slots` to create a plugin that only adds context menu items.
 
 ```tsx
 import { z } from "zod";
@@ -506,10 +446,14 @@ function RowDetailRenderer(context: PluginContext<RowDetailConfig>) {
 export const RowDetailPlugin = definePlugin({
   id: "row-detail",
   name: "Details",
-  position: "right-sider",
   args: RowDetailSchema,
-  header: "Row Details",
-  render: RowDetailRenderer,
+  slots: {
+    sidepanel: {
+      position: "right-sider",
+      header: "Row Details",
+      render: RowDetailRenderer,
+    },
+  },
 });
 ```
 
@@ -569,8 +513,12 @@ function FileExportRenderer(context: PluginContext<z.infer<typeof FileExportSche
 export const FileExportPlugin = definePlugin({
   id: "file-export",
   name: "Export",
-  position: "right-sider",
   args: FileExportSchema,
-  render: FileExportRenderer,
+  slots: {
+    sidepanel: {
+      position: "right-sider",
+      render: FileExportRenderer,
+    },
+  },
 });
 ```
