@@ -40,10 +40,6 @@ export interface UseDataTableOptions<TData> {
   initialSelection?: RowSelectionState;
   enableMultiSelect?: boolean;
   onSelectionChange?: (selection: TData[]) => void;
-  /**
-   * Callback when a row is clicked
-   */
-  onRowClick?: (row: TData) => void;
 }
 
 /**
@@ -168,16 +164,6 @@ export interface DataTableInstance<TData> {
   plugin: PluginControl;
 
   // ===========================================================================
-  // Row Click
-  // ===========================================================================
-
-  /**
-   * Callback invoked when a row is clicked.
-   * Configured via useDataTable options.
-   */
-  onRowClick?: (row: TData) => void;
-
-  // ===========================================================================
   // Event Bus
   // ===========================================================================
 
@@ -216,7 +202,6 @@ export function useDataTable<TData>({
   initialSelection = {},
   enableMultiSelect = true,
   onSelectionChange,
-  onRowClick,
 }: UseDataTableOptions<TData>): DataTableInstance<TData> {
   // Table state
   const [rowSelection, setRowSelection] =
@@ -323,9 +308,6 @@ export function useDataTable<TData>({
       plugins,
       plugin,
 
-      // Row click handler
-      onRowClick,
-
       // Event bus
       eventBus,
 
@@ -341,7 +323,6 @@ export function useDataTable<TData>({
     sorting,
     pagination,
     plugin,
-    onRowClick,
     eventBus,
   ]);
 

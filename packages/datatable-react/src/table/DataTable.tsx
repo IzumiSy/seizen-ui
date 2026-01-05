@@ -22,7 +22,6 @@ export interface DataTableProps<TData> {
  */
 export function DataTable<TData>({ table, className }: DataTableProps<TData>) {
   const tanstack = table._tanstackTable;
-  const onRowClick = table.onRowClick;
 
   const containerClassName = className
     ? `${styles.container} ${className}`
@@ -61,9 +60,7 @@ export function DataTable<TData>({ table, className }: DataTableProps<TData>) {
                   data-selected={row.getIsSelected() || undefined}
                   onClick={() => {
                     table.eventBus.emit("row-click", row.original);
-                    onRowClick?.(row.original);
                   }}
-                  style={onRowClick ? { cursor: "pointer" } : undefined}
                 >
                   {row.getVisibleCells().map((cell) => (
                     <td key={cell.id} className={styles.td}>

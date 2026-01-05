@@ -1,5 +1,6 @@
 export { DataTable } from "./DataTable";
 export { useDataTable } from "./useDataTable";
+export { useDataTableEvent } from "./useDataTableEvent";
 export type { DataTableProps } from "./DataTable";
 
 // Types

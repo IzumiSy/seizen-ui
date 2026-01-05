@@ -38,17 +38,21 @@ export interface EventBusRegistry {
  * - Action events: row-click
  *
  * Plugins can extend EventBusRegistry to add custom events.
+ *
+ * @typeParam TData - The type of row data. Defaults to `unknown`.
  */
-export interface DataTableEventMap extends EventBusRegistry {
+export interface DataTableEventMap<TData = unknown> extends EventBusRegistry {
   /**
    * Emitted when table data changes.
+   * Payload is the entire data array.
    */
-  "data-change": unknown[];
+  "data-change": TData[];
 
   /**
    * Emitted when row selection changes.
+   * Payload is the array of selected rows.
    */
-  "selection-change": unknown[];
+  "selection-change": TData[];
 
   /**
    * Emitted when column filters change.
@@ -67,9 +71,9 @@ export interface DataTableEventMap extends EventBusRegistry {
 
   /**
    * Emitted when a table row is clicked.
-   * Payload is the row data (TData).
+   * Payload is the clicked row data.
    */
-  "row-click": unknown;
+  "row-click": TData;
 }
 
 /**
@@ -96,8 +100,8 @@ export type DataTableEventName = keyof DataTableEventMap;
  * eventBus.emit("row-click", row);
  *
  * // Plugins subscribe via usePluginContext:
- * const { useOnEvent } = usePluginContext();
- * useOnEvent("row-click", (row) => {
+ * const { useEvent } = usePluginContext();
+ * useEvent("row-click", (row) => {
  *   console.log("Row clicked:", row);
  * });
  * ```

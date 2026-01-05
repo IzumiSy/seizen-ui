@@ -33,13 +33,13 @@ function RowDetailRenderer(context: PluginContext<RowDetailConfig>) {
   const { args } = context;
 
   return function RowDetailPanel() {
-    const { openArgs, useOnEvent } = usePluginContext();
+    const { openArgs, useEvent } = usePluginContext();
     // Initialize with openArgs (for first click) or null
     const initialRow = (openArgs as { row: unknown } | undefined)?.row ?? null;
     const [selectedRow, setSelectedRow] = useState<unknown>(initialRow);
 
     // Subscribe to row-click events for subsequent clicks while panel is open
-    useOnEvent("row-click", (row: unknown) => {
+    useEvent("row-click", (row) => {
       setSelectedRow(row);
     });
 

@@ -75,20 +75,20 @@ export interface PluginContextValue<TData = unknown> {
    *
    * @example
    * ```tsx
-   * const { useOnEvent } = usePluginContext();
+   * const { useEvent } = usePluginContext();
    *
    * // Subscribe to selection changes
-   * useOnEvent("selection-change", (selectedRows) => {
+   * useEvent("selection-change", (selectedRows) => {
    *   console.log("Selection changed:", selectedRows);
    * });
    *
    * // Subscribe to row clicks
-   * useOnEvent("row-click", (row) => {
+   * useEvent("row-click", (row) => {
    *   console.log("Row clicked:", row);
    * });
    * ```
    */
-  useOnEvent: <K extends DataTableEventName | (string & {})>(
+  useEvent: <K extends DataTableEventName | (string & {})>(
     event: K,
     callback: (
       payload: K extends DataTableEventName ? DataTableEventMap[K] : unknown
@@ -175,8 +175,8 @@ export function PluginContextProvider<TData>({
     }
   }, [paginationState, table.eventBus]);
 
-  // useOnEvent hook factory
-  const useOnEvent = <K extends DataTableEventName | (string & {})>(
+  // useEvent hook factory
+  const useEvent = <K extends DataTableEventName | (string & {})>(
     event: K,
     callback: (
       payload: K extends DataTableEventName ? DataTableEventMap[K] : unknown
@@ -196,7 +196,7 @@ export function PluginContextProvider<TData>({
     columns,
     selectedRows,
     openArgs: table.plugin._state.args,
-    useOnEvent,
+    useEvent,
   };
 
   return (
@@ -216,9 +216,9 @@ export function PluginContextProvider<TData>({
  * @example
  * ```tsx
  * function MyPluginComponent() {
- *   const { table, data, selectedRows, useOnEvent } = usePluginContext();
+ *   const { table, data, selectedRows, useEvent } = usePluginContext();
  *
- *   useOnEvent("selection-change", (rows) => {
+ *   useEvent("selection-change", (rows) => {
  *     console.log("Selection changed:", rows);
  *   });
  *

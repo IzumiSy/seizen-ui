@@ -1,5 +1,6 @@
 import {
   useDataTable,
+  useDataTableEvent,
   DataTable,
   type ColumnDef,
 } from "@izumisy/seizen-datatable-react";
@@ -8,6 +9,7 @@ import {
   FileExportPlugin,
   CsvExporter,
   JsonlExporter,
+  TsvExporter,
 } from "./plugins/FileExportPlugin";
 
 type Person = {
@@ -82,12 +84,13 @@ function App() {
         width: 450,
         filename: "users",
         includeHeaders: true,
-        exporters: [CsvExporter, JsonlExporter],
+        exporters: [CsvExporter, JsonlExporter, TsvExporter],
       }),
     ],
-    onRowClick: (row) => {
-      table.plugin.open("row-detail", { row });
-    },
+  });
+
+  useDataTableEvent(table, "row-click", (row) => {
+    table.plugin.open("row-detail", { row });
   });
 
   return (
