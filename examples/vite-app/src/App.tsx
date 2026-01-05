@@ -1,4 +1,8 @@
-import { DataTable, type ColumnDef } from "@izumisy/seizen-datatable-react";
+import {
+  useDataTable,
+  DataTable,
+  type ColumnDef,
+} from "@izumisy/seizen-datatable-react";
 
 type Person = {
   name: string;
@@ -18,9 +22,11 @@ const data: Person[] = [
 ];
 
 function App() {
+  const table = useDataTable({ data, columns });
+
   return (
     <div className="p-5">
-      <DataTable data={data} columns={columns} />
+      <DataTable table={table} />
     </div>
   );
 }

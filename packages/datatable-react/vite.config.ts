@@ -10,7 +10,9 @@ export default defineConfig({
     tsconfigPaths(),
     vanillaExtractPlugin(),
     externalizeDeps(),
-    cssInjectedByJsPlugin(),
+    cssInjectedByJsPlugin({
+      jsAssetsFilterFunction: (outputChunk) => outputChunk.name === "index",
+    }),
     dts({
       insertTypesEntry: true,
       rollupTypes: true,
@@ -18,9 +20,11 @@ export default defineConfig({
   ],
   build: {
     lib: {
-      entry: "./src/index.ts",
+      entry: {
+        index: "./src/table/index.ts",
+        plugin: "./src/plugin/index.ts",
+      },
       formats: ["es"],
-      fileName: "index",
     },
   },
 });

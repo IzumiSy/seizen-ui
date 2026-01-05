@@ -1,7 +1,13 @@
 export { DataTable } from "./DataTable";
 export { useDataTable } from "./useDataTable";
 export type { DataTableProps } from "./DataTable";
-export type { DataTableColumn } from "./types";
+
+// Types
+export type {
+  DataTableColumn,
+  DataTableInstance,
+  UseDataTableOptions,
+} from "./useDataTable";
 
 // Re-export useful types from TanStack Table
 export type {
@@ -11,5 +17,9 @@ export type {
   Header,
   HeaderGroup,
   Table,
+  RowSelectionState,
+  SortingState,
+  ColumnFiltersState,
+  PaginationState,
 } from "@tanstack/react-table";
 export { flexRender } from "@tanstack/react-table";
