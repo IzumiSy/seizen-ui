@@ -30,10 +30,15 @@ export type DataTableColumn<TData> = ColumnDef<TData, unknown>;
 export interface UseDataTableOptions<TData> {
   data: TData[];
   columns: DataTableColumn<TData>[];
-  plugins?: DataTablePlugin<TData>[];
+  /** Plugins to use. Plugins that don't use context menu can be DataTablePlugin<any>. */
+  plugins?: DataTablePlugin<any>[];
   initialSelection?: RowSelectionState;
   enableMultiSelect?: boolean;
   onSelectionChange?: (selection: TData[]) => void;
+  /**
+   * Callback when a row is clicked
+   */
+  onRowClick?: (row: TData) => void;
 }
 
 /**
@@ -64,7 +69,14 @@ export interface DataTableInstance<TData> {
   getData: () => TData[];
 
   // Plugins
-  plugins: DataTablePlugin<TData>[];
+  /** Plugins registered with this table */
+  plugins: DataTablePlugin<any>[];
+  openPluginId: string | null;
+  openPlugin: (pluginId: string) => void;
+  closePlugin: () => void;
+
+  // Row click handler
+  onRowClick?: (row: TData) => void;
 
   // TanStack Table instance (for advanced usage)
   _tanstackTable: Table<TData>;
@@ -81,6 +93,7 @@ export function useDataTable<TData>({
   initialSelection = {},
   enableMultiSelect = true,
   onSelectionChange,
+  onRowClick,
 }: UseDataTableOptions<TData>): DataTableInstance<TData> {
   // Table state
   const [rowSelection, setRowSelection] =
@@ -92,6 +105,7 @@ export function useDataTable<TData>({
     pageIndex: 0,
     pageSize: 10,
   });
+  const [openPluginId, setOpenPluginId] = useState<string | null>(null);
 
   // Handle selection change callback
   const handleRowSelectionChange = useCallback(
@@ -178,6 +192,12 @@ export function useDataTable<TData>({
 
       // Plugins
       plugins,
+      openPluginId,
+      openPlugin: (pluginId: string) => setOpenPluginId(pluginId),
+      closePlugin: () => setOpenPluginId(null),
+
+      // Row click handler
+      onRowClick,
 
       // TanStack Table instance for advanced usage
       _tanstackTable: tanstackTable,
@@ -190,6 +210,8 @@ export function useDataTable<TData>({
     globalFilter,
     sorting,
     pagination,
+    openPluginId,
+    onRowClick,
   ]);
 
   // Notify selection changes

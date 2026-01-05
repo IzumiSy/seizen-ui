@@ -3,10 +3,10 @@ import type {
   DataTablePlugin,
   PluginPosition,
   SidepanelPlugin,
-} from "../plugin";
-import * as styles from "../plugin/styles.css";
+} from "./definePlugin";
+import * as styles from "./styles.css";
 
-interface PluginRendererProps<TData> {
+interface PluginRendererProps {
   /**
    * Plugin position to render
    */
@@ -15,7 +15,7 @@ interface PluginRendererProps<TData> {
   /**
    * Plugins to render
    */
-  plugins: DataTablePlugin<TData>[];
+  plugins: DataTablePlugin<any>[];
 
   /**
    * Currently active plugin ID
@@ -31,25 +31,25 @@ interface PluginRendererProps<TData> {
 /**
  * Check if a plugin is a sidepanel plugin
  */
-function isSidepanelPlugin<TData>(
-  plugin: DataTablePlugin<TData>
-): plugin is SidepanelPlugin<TData> {
+function isSidepanelPlugin(
+  plugin: DataTablePlugin<any>
+): plugin is SidepanelPlugin<any> {
   return "position" in plugin && "render" in plugin;
 }
 
 /**
  * Renders plugins for a specific position
  */
-export function PluginRenderer<TData>({
+export function PluginRenderer({
   position,
   plugins,
   activePluginId,
   onActivePluginChange,
-}: PluginRendererProps<TData>) {
+}: PluginRendererProps) {
   // Filter plugins by position
   const sidepanelPlugins = plugins.filter(
     (p) => isSidepanelPlugin(p) && p.position === position
-  ) as SidepanelPlugin<TData>[];
+  ) as SidepanelPlugin<any>[];
 
   // Memoize plugin components to maintain stable references
   const pluginComponents = useMemo(() => {

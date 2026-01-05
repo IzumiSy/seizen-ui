@@ -28,11 +28,6 @@ const fallback = {
   cellPaddingY: "10px",
   rowHoverBg: "#f3f4f6",
   rowSelectedBg: "#eff6ff",
-  sidepanelBg: "#f9fafb",
-  sidepanelWidth: "40px",
-  sidepanelTabBg: "transparent",
-  sidepanelTabHoverBg: "#e5e7eb",
-  sidepanelTabActiveBg: "#ffffff",
 };
 
 // Container for the entire DataTable with sidepanels
@@ -96,51 +91,4 @@ export const trLast = style({});
 // Remove bottom border from last row
 globalStyle(`${tr}:last-child ${td}`, {
   borderBottom: "none",
-});
-
-// Sidepanel styles
-export const sidepanel = style({
-  display: "flex",
-  flexDirection: "column",
-  width: `var(--szui-sidepanel-width, ${fallback.sidepanelWidth})`,
-  backgroundColor: `var(--szui-sidepanel-bg, ${fallback.sidepanelBg})`,
-  borderColor: `var(--szui-border-color, ${fallback.borderColor})`,
-  selectors: {
-    '&[data-position="left"]': {
-      borderRight: `var(--szui-border-width, ${fallback.borderWidth}) solid var(--szui-border-color, ${fallback.borderColor})`,
-    },
-    '&[data-position="right"]': {
-      borderLeft: `var(--szui-border-width, ${fallback.borderWidth}) solid var(--szui-border-color, ${fallback.borderColor})`,
-    },
-  },
-});
-
-export const sidepanelTab = style({
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  padding: "12px 8px",
-  cursor: "pointer",
-  backgroundColor: `var(--szui-sidepanel-tab-bg, ${fallback.sidepanelTabBg})`,
-  borderBottom: `var(--szui-border-width, ${fallback.borderWidth}) solid var(--szui-border-color, ${fallback.borderColor})`,
-  selectors: {
-    "&:hover": {
-      backgroundColor: `var(--szui-sidepanel-tab-hover-bg, ${fallback.sidepanelTabHoverBg})`,
-    },
-    "&[data-active]": {
-      backgroundColor: `var(--szui-sidepanel-tab-active-bg, ${fallback.sidepanelTabActiveBg})`,
-    },
-  },
-});
-
-export const sidepanelTabLabel = style({
-  writingMode: "vertical-rl",
-  textOrientation: "mixed",
-  transform: "rotate(180deg)",
-  fontSize: `var(--szui-header-font-size, ${fallback.headerFontSize})`,
-  fontWeight: `var(--szui-header-font-weight, ${fallback.headerFontWeight})`,
-  color: `var(--szui-header-color, ${fallback.headerColor})`,
-  textTransform: "uppercase",
-  letterSpacing: "0.05em",
-  whiteSpace: "nowrap",
 });

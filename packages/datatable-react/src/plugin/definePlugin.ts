@@ -27,6 +27,8 @@ interface BasePlugin {
  */
 export interface SidepanelPlugin<TData = unknown> extends BasePlugin {
   position: PluginPosition;
+  /** Header content displayed at the top of the panel when open. Can be a string or ReactNode. */
+  header?: string | ReactNode;
   render: () => ReactNode;
   contextMenu?: {
     items: ContextMenuItemFactory<TData, unknown>[];
@@ -43,7 +45,8 @@ export interface ContextMenuOnlyPlugin<TData = unknown> extends BasePlugin {
 }
 
 /**
- * Plugin can be either a sidepanel plugin or a context menu only plugin
+ * Plugin can be either a sidepanel plugin or a context menu only plugin.
+ * Use DataTablePlugin<unknown> for plugins that don't use TData in context menu.
  */
 export type DataTablePlugin<TData = unknown> =
   | SidepanelPlugin<TData>
@@ -80,6 +83,8 @@ export interface DefineSidepanelPluginOptions<TData, TSchema extends z.ZodType>
   extends BasePluginOptions<TSchema> {
   /** Plugin position in the DataTable layout */
   position: PluginPosition;
+  /** Header content displayed at the top of the panel. Can be a string or ReactNode. If not provided, name is used. */
+  header?: string | ((context: PluginContext<z.infer<TSchema>>) => ReactNode);
   /** Render function that receives context with validated args and returns a React component */
   render: (context: PluginContext<z.infer<TSchema>>) => () => ReactNode;
   /** Optional context menu configuration */
@@ -197,10 +202,16 @@ export function definePlugin<TData, TSchema extends z.ZodType>(
           TData,
           TSchema
         >;
+        // Resolve header: string stays as string, function gets called
+        const header =
+          typeof sidepanelOptions.header === "function"
+            ? sidepanelOptions.header(context)
+            : sidepanelOptions.header;
         return {
           id: options.id,
           name: options.name,
           position: sidepanelOptions.position,
+          header,
           render: sidepanelOptions.render(context),
           contextMenu: sidepanelOptions.contextMenu,
         } as SidepanelPlugin<TData>;

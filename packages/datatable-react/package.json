@@ -25,7 +25,8 @@
   "license": "MIT",
   "peerDependencies": {
     "react": ">= 19",
-    "react-dom": ">= 19"
+    "react-dom": ">= 19",
+    "zod": ">= 4"
   },
   "dependencies": {
     "@tanstack/react-table": "^8.21.3",

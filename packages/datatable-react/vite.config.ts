@@ -11,7 +11,8 @@ export default defineConfig({
     vanillaExtractPlugin(),
     externalizeDeps(),
     cssInjectedByJsPlugin({
-      jsAssetsFilterFunction: (outputChunk) => outputChunk.name === "index",
+      jsAssetsFilterFunction: (outputChunk) =>
+        ["index", "plugin"].includes(outputChunk.name),
     }),
     dts({
       insertTypesEntry: true,

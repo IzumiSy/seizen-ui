@@ -1,6 +1,6 @@
 import { flexRender } from "@tanstack/react-table";
 import type { DataTableInstance } from "./useDataTable";
-import { PluginRenderer } from "./PluginRenderer";
+import { PluginRenderer } from "../plugin/Renderer";
 import * as styles from "./styles.css";
 
 export interface DataTableProps<TData> {
@@ -21,6 +21,7 @@ export interface DataTableProps<TData> {
  */
 export function DataTable<TData>({ table, className }: DataTableProps<TData>) {
   const tanstack = table._tanstackTable;
+  const onRowClick = table.onRowClick;
 
   const containerClassName = className
     ? `${styles.container} ${className}`
@@ -29,7 +30,14 @@ export function DataTable<TData>({ table, className }: DataTableProps<TData>) {
   return (
     <div className={containerClassName}>
       {/* Left Sidepanel */}
-      <PluginRenderer position="left-sider" plugins={table.plugins} />
+      <PluginRenderer
+        position="left-sider"
+        plugins={table.plugins}
+        activePluginId={table.openPluginId}
+        onActivePluginChange={(id) =>
+          id ? table.openPlugin(id) : table.closePlugin()
+        }
+      />
 
       {/* Main Table */}
       <div className={styles.tableWrapper}>
@@ -56,6 +64,8 @@ export function DataTable<TData>({ table, className }: DataTableProps<TData>) {
                 key={row.id}
                 className={styles.tr}
                 data-selected={row.getIsSelected() || undefined}
+                onClick={() => onRowClick?.(row.original)}
+                style={onRowClick ? { cursor: "pointer" } : undefined}
               >
                 {row.getVisibleCells().map((cell) => (
                   <td key={cell.id} className={styles.td}>
@@ -69,7 +79,14 @@ export function DataTable<TData>({ table, className }: DataTableProps<TData>) {
       </div>
 
       {/* Right Sidepanel */}
-      <PluginRenderer position="right-sider" plugins={table.plugins} />
+      <PluginRenderer
+        position="right-sider"
+        plugins={table.plugins}
+        activePluginId={table.openPluginId}
+        onActivePluginChange={(id) =>
+          id ? table.openPlugin(id) : table.closePlugin()
+        }
+      />
     </div>
   );
 }
