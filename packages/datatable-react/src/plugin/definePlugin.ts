@@ -215,23 +215,6 @@ interface BasePluginOptions<TSchema extends z.ZodType> {
 }
 
 /**
- * Options for defining a sidepanel plugin
- */
-export interface DefineSidepanelPluginOptions<TData, TSchema extends z.ZodType>
-  extends BasePluginOptions<TSchema> {
-  /** Plugin position in the DataTable layout */
-  position: PluginPosition;
-  /** Header content displayed at the top of the panel. Can be a string or ReactNode. If not provided, name is used. */
-  header?: string | ((context: PluginContext<z.infer<TSchema>>) => ReactNode);
-  /** Render function that receives context with validated args and returns a React component */
-  render: (context: PluginContext<z.infer<TSchema>>) => () => ReactNode;
-  /** Optional context menu configuration */
-  contextMenu?: {
-    items: ContextMenuItemFactory<TData, z.infer<TSchema>>[];
-  };
-}
-
-/**
  * Options for defining a context menu only plugin
  */
 export interface DefineContextMenuPluginOptions<
@@ -293,9 +276,8 @@ export interface DefineSlotPluginOptions<TData, TSchema extends z.ZodType>
 }
 
 export type DefinePluginOptions<TData, TSchema extends z.ZodType> =
-  | DefineSidepanelPluginOptions<TData, TSchema>
-  | DefineContextMenuPluginOptions<TData, TSchema>
-  | DefineSlotPluginOptions<TData, TSchema>;
+  | DefineSlotPluginOptions<TData, TSchema>
+  | DefineContextMenuPluginOptions<TData, TSchema>;
 
 /**
  * Define a plugin with type-safe configuration.
@@ -303,7 +285,7 @@ export type DefinePluginOptions<TData, TSchema extends z.ZodType> =
  * This function creates a plugin factory with a `configure` method that validates
  * configuration at runtime using the provided Zod schema.
  *
- * @example Sidepanel Plugin
+ * @example Slot Plugin with Sidepanel
  * ```tsx
  * import { z } from "zod";
  * import { definePlugin, contextMenuItem, usePluginContext } from "@izumisy/seizen-datatable-react/plugin";
@@ -313,13 +295,10 @@ export type DefinePluginOptions<TData, TSchema extends z.ZodType> =
  *   enableExport: z.boolean().default(true),
  * });
  *
- * function BulkActionsRenderer(context: PluginContext<z.infer<typeof BulkActionsSchema>>) {
+ * function createSidepanelRenderer(context: PluginContext<z.infer<typeof BulkActionsSchema>>) {
  *   const { args } = context;
- *   return function Render() {
- *     const { selectedRows, useOnChange } = usePluginContext();
- *     useOnChange("selection", (selection) => {
- *       console.log("Selection changed:", selection);
- *     });
+ *   return function SidepanelContent() {
+ *     const { selectedRows } = usePluginContext();
  *     if (selectedRows.length === 0) return null;
  *     return (
  *       <div className="bulk-actions">
@@ -334,9 +313,13 @@ export type DefinePluginOptions<TData, TSchema extends z.ZodType> =
  * const BulkActions = definePlugin({
  *   id: "bulk-actions",
  *   name: "Bulk Actions",
- *   position: "right-sider",
  *   args: BulkActionsSchema,
- *   render: BulkActionsRenderer,
+ *   slots: {
+ *     sidepanel: {
+ *       position: "right-sider",
+ *       render: createSidepanelRenderer,
+ *     },
+ *   },
  *   contextMenu: {
  *     items: [
  *       contextMenuItem("delete", (ctx) => ({
@@ -360,7 +343,6 @@ export type DefinePluginOptions<TData, TSchema extends z.ZodType> =
  *   args: z.object({
  *     enableCopyId: z.boolean().default(true),
  *   }),
- *   // No position or render - context menu only
  *   contextMenu: {
  *     items: [
  *       contextMenuItem("copy-id", (ctx) => ({
@@ -435,27 +417,6 @@ export function definePlugin<TData, TSchema extends z.ZodType>(
           slots,
           contextMenu: slotOptions.contextMenu,
         } as SlotPlugin<TData>;
-      }
-
-      // Check if it's a legacy sidepanel plugin
-      if ("position" in options && "render" in options) {
-        const sidepanelOptions = options as DefineSidepanelPluginOptions<
-          TData,
-          TSchema
-        >;
-        // Resolve header: string stays as string, function gets called
-        const header =
-          typeof sidepanelOptions.header === "function"
-            ? sidepanelOptions.header(context)
-            : sidepanelOptions.header;
-        return {
-          id: options.id,
-          name: options.name,
-          position: sidepanelOptions.position,
-          header,
-          render: sidepanelOptions.render(context),
-          contextMenu: sidepanelOptions.contextMenu,
-        } as SidepanelPlugin<TData>;
       }
 
       // Context menu only plugin

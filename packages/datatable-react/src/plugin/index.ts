@@ -33,7 +33,6 @@ export type {
   // Define options
   DefinePluginSlots,
   DefineSlotPluginOptions,
-  DefineSidepanelPluginOptions,
   DefineContextMenuPluginOptions,
   DefinePluginOptions,
 } from "./definePlugin";
