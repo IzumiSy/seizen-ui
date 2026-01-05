@@ -12,6 +12,7 @@ import {
   TsvExporter,
 } from "./plugins/FileExportPlugin";
 import { ColumnControlPlugin } from "./plugins/ColumnControlPlugin";
+import { AllSlotsDemo } from "./plugins/AllSlotsPlugin";
 import { data, type Person } from "./data";
 import {
   StatusBadge,
@@ -104,11 +105,17 @@ function App() {
         includeHeaders: true,
         exporters: [CsvExporter, JsonlExporter, TsvExporter],
       }),
+      AllSlotsDemo.configure({
+        sidepanelTitle: "All Slots Demo",
+        enableCellHighlight: true,
+        primaryColor: "#8b5cf6",
+      }),
     ],
   });
 
   useDataTableEvent(table, "row-click", (row) => {
-    table.plugin.open("row-detail", { row });
+    // Open inline row when clicking a row
+    table.plugin.open("all-slots-demo", { id: row.id });
   });
 
   return (
