@@ -9,7 +9,22 @@ import {
   InlineRowSlotRenderer,
 } from "../plugin/Renderer";
 import { PluginContextProvider } from "../plugin/Context";
+import { Paginator } from "./Paginator";
 import * as styles from "./styles.css";
+
+export interface PaginateOptions {
+  /**
+   * Whether to enable pagination
+   * @default true
+   */
+  enable?: boolean;
+
+  /**
+   * Page size options to display in the paginator dropdown
+   * @default [10, 20, 50, 100]
+   */
+  sizeOptions?: number[];
+}
 
 export interface DataTableProps<TData> {
   /**
@@ -21,14 +36,25 @@ export interface DataTableProps<TData> {
    * Additional CSS class name for the table container
    */
   className?: string;
+
+  /**
+   * Pagination options
+   */
+  paginate?: PaginateOptions;
 }
 
 /**
  * DataTable component with default UI rendering
  * Uses semantic HTML table elements with CSS Variables for theming
  */
-export function DataTable<TData>({ table, className }: DataTableProps<TData>) {
+export function DataTable<TData>({
+  table,
+  className,
+  paginate,
+}: DataTableProps<TData>) {
   const tanstack = table._tanstackTable;
+  const paginateEnabled = paginate?.enable ?? true;
+  const paginateSizeOptions = paginate?.sizeOptions ?? [10, 20, 50, 100];
 
   const containerClassName = className
     ? `${styles.container} ${className}`
@@ -104,6 +130,10 @@ export function DataTable<TData>({ table, className }: DataTableProps<TData>) {
           </table>
           {/* Footer Slot - below the table */}
           <FooterSlotRenderer />
+          {/* Paginator - below footer slot */}
+          {paginateEnabled && (
+            <Paginator table={table} sizeOptions={paginateSizeOptions} />
+          )}
         </div>
 
         {/* Right Sidepanel */}

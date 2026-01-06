@@ -1,7 +1,9 @@
 export { DataTable } from "./DataTable";
+export { Paginator } from "./Paginator";
 export { useDataTable } from "./useDataTable";
 export { useDataTableEvent } from "./useDataTableEvent";
-export type { DataTableProps } from "./DataTable";
+export type { DataTableProps, PaginateOptions } from "./DataTable";
+export type { PaginatorProps } from "./Paginator";
 
 // Types
 export type {

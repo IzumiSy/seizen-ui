@@ -92,3 +92,128 @@ export const trLast = style({});
 globalStyle(`${tr}:last-child ${td}`, {
   borderBottom: "none",
 });
+
+// =============================================================================
+// Paginator Styles
+// =============================================================================
+
+export const paginator = style({
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "space-between",
+  padding: "12px 16px",
+  borderTop: `var(--szui-border-width, ${fallback.borderWidth}) solid var(--szui-border-color, ${fallback.borderColor})`,
+  backgroundColor: `var(--szui-header-bg, ${fallback.headerBg})`,
+  gap: "16px",
+  flexWrap: "wrap",
+  fontSize: "13px",
+});
+
+export const paginatorLeft = style({
+  display: "flex",
+  alignItems: "center",
+  gap: "8px",
+  flex: "0 0 auto",
+});
+
+export const paginatorCenter = style({
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  flex: "1 1 auto",
+  minWidth: "120px",
+});
+
+export const paginatorRight = style({
+  display: "flex",
+  alignItems: "center",
+  gap: "8px",
+  flex: "0 0 auto",
+});
+
+export const paginatorPageSize = style({
+  display: "flex",
+  alignItems: "center",
+  gap: "8px",
+});
+
+export const paginatorLabel = style({
+  color: `var(--szui-header-color, ${fallback.headerColor})`,
+  fontSize: "13px",
+  fontWeight: "500",
+  whiteSpace: "nowrap",
+});
+
+export const paginatorSelect = style({
+  padding: "4px 8px",
+  fontSize: "13px",
+  border: `1px solid var(--szui-border-color, ${fallback.borderColor})`,
+  borderRadius: "4px",
+  backgroundColor: `var(--szui-color-bg, ${fallback.colorBg})`,
+  color: `var(--szui-color-text, ${fallback.colorText})`,
+  cursor: "pointer",
+  outline: "none",
+  selectors: {
+    "&:hover": {
+      borderColor: "#9ca3af",
+    },
+    "&:focus": {
+      borderColor: "#3b82f6",
+      boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.1)",
+    },
+  },
+});
+
+export const paginatorInfo = style({
+  color: `var(--szui-header-color, ${fallback.headerColor})`,
+  fontSize: "13px",
+  fontWeight: "500",
+  whiteSpace: "nowrap",
+});
+
+export const paginatorButtons = style({
+  display: "flex",
+  alignItems: "center",
+  gap: "4px",
+});
+
+export const paginatorButton = style({
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  width: "32px",
+  height: "32px",
+  padding: "0",
+  border: `1px solid var(--szui-border-color, ${fallback.borderColor})`,
+  borderRadius: "4px",
+  backgroundColor: `var(--szui-color-bg, ${fallback.colorBg})`,
+  color: `var(--szui-color-text, ${fallback.colorText})`,
+  cursor: "pointer",
+  outline: "none",
+  transition: "all 0.15s ease",
+  selectors: {
+    "&:hover:not(:disabled)": {
+      backgroundColor: `var(--szui-row-hover-bg, ${fallback.rowHoverBg})`,
+      borderColor: "#9ca3af",
+    },
+    "&:active:not(:disabled)": {
+      transform: "scale(0.95)",
+    },
+    "&:disabled": {
+      opacity: 0.4,
+      cursor: "not-allowed",
+    },
+    "&:focus-visible": {
+      borderColor: "#3b82f6",
+      boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.1)",
+    },
+  },
+});
+
+export const paginatorPageNumber = style({
+  color: `var(--szui-header-color, ${fallback.headerColor})`,
+  fontSize: "13px",
+  fontWeight: "500",
+  whiteSpace: "nowrap",
+  padding: "0 8px",
+});
