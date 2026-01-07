@@ -275,23 +275,25 @@ function SorterTab() {
   // Subscribe to column:sort-request event (from context menu)
   useEvent("column:sort-request", (payload) => {
     const { columnId, direction } = payload;
+    // Get fresh sorting state inside callback to avoid stale closure
+    const currentSorting = table.getSortingState();
     if (direction === "clear") {
       // Remove this column from sorting
-      const newSorting = sortingState.filter((s) => s.id !== columnId);
+      const newSorting = currentSorting.filter((s) => s.id !== columnId);
       table.setSorting(newSorting);
     } else {
       // Check if column is already being sorted
-      const existingIndex = sortingState.findIndex((s) => s.id === columnId);
+      const existingIndex = currentSorting.findIndex((s) => s.id === columnId);
       if (existingIndex >= 0) {
         // Update direction
-        const newSorting = sortingState.map((s) =>
+        const newSorting = currentSorting.map((s) =>
           s.id === columnId ? { ...s, desc: direction === "desc" } : s
         );
         table.setSorting(newSorting);
       } else {
         // Add new sorter
         const newSorting = [
-          ...sortingState,
+          ...currentSorting,
           { id: columnId, desc: direction === "desc" },
         ];
         table.setSorting(newSorting);
