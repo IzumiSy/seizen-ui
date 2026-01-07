@@ -1,12 +1,5 @@
 import type { PluginRegistry } from "./usePluginToggle";
 
-export {
-  usePluginToggle,
-  type PluginDefinition,
-  type PluginRegistry,
-  type UsePluginToggleOptions,
-} from "./usePluginToggle";
-
 // =============================================================================
 // PluginToggleItem Component
 // =============================================================================
