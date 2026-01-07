@@ -3,8 +3,33 @@ import { z } from "zod";
 import {
   definePlugin,
   usePluginContext,
+  columnContextMenuItem,
   type PluginContext,
 } from "@izumisy/seizen-datatable-react/plugin";
+
+// =============================================================================
+// Module Augmentation for EventBus
+// =============================================================================
+
+declare module "@izumisy/seizen-datatable-react/plugin" {
+  interface EventBusRegistry {
+    /**
+     * Request to hide a column from context menu.
+     * ColumnControlPlugin subscribes to this to sync sidepanel state.
+     */
+    "column:hide-request": {
+      columnId: string;
+    };
+    /**
+     * Request to sort a column from context menu.
+     * ColumnControlPlugin subscribes to this to sync sidepanel state.
+     */
+    "column:sort-request": {
+      columnId: string;
+      direction: "asc" | "desc" | "clear";
+    };
+  }
+}
 
 /**
  * Schema for ColumnControl plugin configuration
@@ -55,7 +80,7 @@ function TabButton({
 // Visibility Tab Component
 // =============================================================================
 function VisibilityTab() {
-  const { columns, table } = usePluginContext();
+  const { columns, table, useEvent } = usePluginContext();
   const columnVisibility = table.getColumnVisibility();
   const [searchQuery, setSearchQuery] = useState("");
   const [draggedColumn, setDraggedColumn] = useState<string | null>(null);
@@ -63,6 +88,16 @@ function VisibilityTab() {
 
   const isColumnVisible = (columnKey: string) =>
     columnVisibility[columnKey] !== false;
+
+  // Subscribe to column:hide-request event (from context menu)
+  useEvent("column:hide-request", (payload) => {
+    const { columnId } = payload;
+    // Use setColumnVisibility to explicitly hide (not toggle)
+    table.setColumnVisibility({
+      ...table.getColumnVisibility(),
+      [columnId]: false,
+    });
+  });
 
   const filteredColumns = columns.filter(
     (column) =>
@@ -162,9 +197,7 @@ function VisibilityTab() {
                   : isDragging
                   ? "#f3f4f6"
                   : "#fff",
-                border: isDragOver
-                  ? "2px dashed #3b82f6"
-                  : "1px solid #e5e7eb",
+                border: isDragOver ? "2px dashed #3b82f6" : "1px solid #e5e7eb",
                 cursor: searchQuery ? "default" : "grab",
                 userSelect: "none",
                 transition: "all 0.15s ease",
@@ -234,10 +267,39 @@ interface SorterItem {
 }
 
 function SorterTab() {
-  const { columns, table } = usePluginContext();
+  const { columns, table, useEvent } = usePluginContext();
   const sortingState = table.getSortingState();
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+
+  // Subscribe to column:sort-request event (from context menu)
+  useEvent("column:sort-request", (payload) => {
+    const { columnId, direction } = payload;
+    // Get fresh sorting state inside callback to avoid stale closure
+    const currentSorting = table.getSortingState();
+    if (direction === "clear") {
+      // Remove this column from sorting
+      const newSorting = currentSorting.filter((s) => s.id !== columnId);
+      table.setSorting(newSorting);
+    } else {
+      // Check if column is already being sorted
+      const existingIndex = currentSorting.findIndex((s) => s.id === columnId);
+      if (existingIndex >= 0) {
+        // Update direction
+        const newSorting = currentSorting.map((s) =>
+          s.id === columnId ? { ...s, desc: direction === "desc" } : s
+        );
+        table.setSorting(newSorting);
+      } else {
+        // Add new sorter
+        const newSorting = [
+          ...currentSorting,
+          { id: columnId, desc: direction === "desc" },
+        ];
+        table.setSorting(newSorting);
+      }
+    }
+  });
 
   // Convert sorting state to sorter items with column headers
   const sorterItems: SorterItem[] = useMemo(() => {
@@ -260,10 +322,7 @@ function SorterTab() {
   // Add a new sorter
   const addSorter = useCallback(
     (columnKey: string) => {
-      const newSorting = [
-        ...sortingState,
-        { id: columnKey, desc: false },
-      ];
+      const newSorting = [...sortingState, { id: columnKey, desc: false }];
       table.setSorting(newSorting);
     },
     [sortingState, table]
@@ -621,5 +680,46 @@ export const ColumnControlPlugin = definePlugin({
       header: "Column Settings",
       render: ColumnControlRenderer,
     },
+  },
+  contextMenuItems: {
+    column: [
+      columnContextMenuItem("hide-column", (ctx) => ({
+        label: "Hide column",
+        onClick: () => {
+          ctx.emit("column:hide-request", { columnId: ctx.column.id });
+        },
+        visible: ctx.column.getCanHide(),
+      })),
+      columnContextMenuItem("sort-asc", (ctx) => ({
+        label: "Sort ascending",
+        onClick: () => {
+          ctx.emit("column:sort-request", {
+            columnId: ctx.column.id,
+            direction: "asc",
+          });
+        },
+        visible: ctx.column.getCanSort(),
+      })),
+      columnContextMenuItem("sort-desc", (ctx) => ({
+        label: "Sort descending",
+        onClick: () => {
+          ctx.emit("column:sort-request", {
+            columnId: ctx.column.id,
+            direction: "desc",
+          });
+        },
+        visible: ctx.column.getCanSort(),
+      })),
+      columnContextMenuItem("clear-sort", (ctx) => ({
+        label: "Clear sort",
+        onClick: () => {
+          ctx.emit("column:sort-request", {
+            columnId: ctx.column.id,
+            direction: "clear",
+          });
+        },
+        visible: ctx.column.getCanSort() && ctx.column.getIsSorted() !== false,
+      })),
+    ],
   },
 });

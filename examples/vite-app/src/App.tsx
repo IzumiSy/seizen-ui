@@ -5,11 +5,7 @@ import {
   type ColumnDef,
 } from "@izumisy/seizen-datatable-react";
 import { data, type Person } from "./data";
-import {
-  usePluginToggle,
-  PluginToggleList,
-  type PluginRegistry,
-} from "./plugins/PluginToggle";
+import { PluginToggleList } from "./plugins/PluginToggle";
 import { RowDetailPlugin } from "./plugins/RowDetailPlugin";
 import {
   FileExportPlugin,
@@ -29,6 +25,10 @@ import {
   DateCell,
   LocationCell,
 } from "./components/cells";
+import {
+  type PluginRegistry,
+  usePluginToggle,
+} from "./plugins/usePluginToggle";
 
 // =============================================================================
 // Plugin Definitions

@@ -168,3 +168,94 @@ export const inlineRowCell = style({
   padding: `var(--szui-cell-padding-y, ${fallback.cellPaddingY}) var(--szui-cell-padding-x, ${fallback.cellPaddingX})`,
   borderBottom: `var(--szui-border-width, ${fallback.borderWidth}) solid var(--szui-border-color, ${fallback.borderColor})`,
 });
+
+// =============================================================================
+// Context Menu Styles
+// =============================================================================
+
+export const contextMenuOverlay = style({
+  position: "fixed",
+  top: 0,
+  left: 0,
+  right: 0,
+  bottom: 0,
+  zIndex: 1000,
+});
+
+export const contextMenu = style({
+  position: "fixed",
+  zIndex: 1001,
+  minWidth: "180px",
+  maxWidth: "280px",
+  backgroundColor: "#ffffff",
+  border: `var(--szui-border-width, ${fallback.borderWidth}) solid var(--szui-border-color, ${fallback.borderColor})`,
+  borderRadius: "6px",
+  boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
+  padding: "4px 0",
+  overflow: "hidden",
+});
+
+export const contextMenuSection = style({
+  borderTop: `var(--szui-border-width, ${fallback.borderWidth}) solid var(--szui-border-color, ${fallback.borderColor})`,
+  marginTop: "4px",
+  paddingTop: "4px",
+  selectors: {
+    "&:first-child": {
+      borderTop: "none",
+      marginTop: 0,
+      paddingTop: 0,
+    },
+  },
+});
+
+export const contextMenuSectionLabel = style({
+  fontSize: "11px",
+  fontWeight: "600",
+  color: `var(--szui-header-color, ${fallback.headerColor})`,
+  textTransform: "uppercase",
+  letterSpacing: "0.05em",
+  padding: "4px 12px 6px",
+  margin: 0,
+});
+
+export const contextMenuItem = style({
+  display: "flex",
+  alignItems: "center",
+  gap: "8px",
+  width: "100%",
+  padding: "8px 12px",
+  fontSize: `var(--szui-font-size, ${fallback.fontSize})`,
+  color: `var(--szui-color-text, ${fallback.colorText})`,
+  backgroundColor: "transparent",
+  border: "none",
+  cursor: "pointer",
+  textAlign: "left",
+  selectors: {
+    "&:hover": {
+      backgroundColor: `var(--szui-sidepanel-tab-hover-bg, ${fallback.sidepanelTabHoverBg})`,
+    },
+    "&[data-disabled]": {
+      opacity: 0.5,
+      cursor: "not-allowed",
+    },
+    "&[data-disabled]:hover": {
+      backgroundColor: "transparent",
+    },
+  },
+});
+
+export const contextMenuItemIcon = style({
+  flexShrink: 0,
+  width: "16px",
+  height: "16px",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+});
+
+export const contextMenuItemLabel = style({
+  flex: 1,
+  overflow: "hidden",
+  textOverflow: "ellipsis",
+  whiteSpace: "nowrap",
+});

@@ -3,6 +3,9 @@ import type {
   ColumnFiltersState,
   PaginationState,
   SortingState,
+  Cell,
+  Column,
+  Row,
 } from "@tanstack/react-table";
 
 // =============================================================================
@@ -74,6 +77,25 @@ export interface DataTableEventMap<TData = unknown> extends EventBusRegistry {
    * Payload is the clicked row data.
    */
   "row-click": TData;
+
+  /**
+   * Emitted when cell context menu is opened.
+   * Payload includes the cell, column, row, and value.
+   */
+  "cell-context-menu": {
+    cell: Cell<TData, unknown>;
+    column: Column<TData, unknown>;
+    row: Row<TData>;
+    value: unknown;
+  };
+
+  /**
+   * Emitted when column header context menu is opened.
+   * Payload includes the column.
+   */
+  "column-context-menu": {
+    column: Column<TData, unknown>;
+  };
 }
 
 /**

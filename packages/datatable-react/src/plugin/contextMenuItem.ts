@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
-import type { Table } from "@tanstack/react-table";
+import type { Table, Cell, Column, Row } from "@tanstack/react-table";
+import type { EventBus } from "./useEventBus";
 
 // =============================================================================
 // Context Menu Types
@@ -21,66 +22,154 @@ export interface ContextMenuItemEntry {
   disabled?: boolean;
 }
 
+// =============================================================================
+// Cell Context Menu
+// =============================================================================
+
 /**
- * Context passed to contextMenuItem factory function
+ * Context passed to cellContextMenuItem factory function
  */
-export interface ContextMenuItemContext<TData, TArgs = unknown> {
-  /** The row that was right-clicked */
-  row: TData;
-  /** Index of the right-clicked row */
-  rowIndex: number;
+export interface CellContextMenuItemContext<TData, TArgs = unknown> {
+  /** The cell that was right-clicked */
+  cell: Cell<TData, unknown>;
+  /** The column of the right-clicked cell */
+  column: Column<TData, unknown>;
+  /** The row containing the right-clicked cell */
+  row: Row<TData>;
+  /** The raw value of the cell (cell.getValue()) */
+  value: unknown;
   /** Currently selected rows in the table */
   selectedRows: TData[];
   /** TanStack Table instance */
   table: Table<TData>;
   /** Plugin configuration args (validated by Zod schema) */
   pluginArgs: TArgs;
+  /** Emit an event to the EventBus */
+  emit: EventBus["emit"];
 }
 
 /**
- * Factory type for creating context menu items
+ * Factory type for creating cell context menu items
  */
-export interface ContextMenuItemFactory<TData, TArgs = unknown> {
+export interface CellContextMenuItemFactory<TData, TArgs = unknown> {
   id: string;
-  create: (ctx: ContextMenuItemContext<TData, TArgs>) => ContextMenuItemEntry;
+  create: (
+    ctx: CellContextMenuItemContext<TData, TArgs>
+  ) => ContextMenuItemEntry;
+}
+
+// =============================================================================
+// Column Context Menu
+// =============================================================================
+
+/**
+ * Context passed to columnContextMenuItem factory function
+ */
+export interface ColumnContextMenuItemContext<TData, TArgs = unknown> {
+  /** The column header that was right-clicked */
+  column: Column<TData, unknown>;
+  /** TanStack Table instance */
+  table: Table<TData>;
+  /** Plugin configuration args (validated by Zod schema) */
+  pluginArgs: TArgs;
+  /** Emit an event to the EventBus */
+  emit: EventBus["emit"];
 }
 
 /**
- * Helper function to create a context menu item with full context access.
+ * Factory type for creating column context menu items
+ */
+export interface ColumnContextMenuItemFactory<TData, TArgs = unknown> {
+  id: string;
+  create: (
+    ctx: ColumnContextMenuItemContext<TData, TArgs>
+  ) => ContextMenuItemEntry;
+}
+
+// =============================================================================
+// Cell Context Menu Factory
+// =============================================================================
+
+/**
+ * Helper function to create a cell context menu item with full context access.
  *
- * The factory function receives context including the clicked row, selected rows,
+ * The factory function receives context including the clicked cell, column, row,
+ * cell value, table instance, and plugin configuration args.
+ *
+ * @param id - Unique identifier for the menu item
+ * @param factory - Factory function that receives context and returns menu item entry
+ *
+ * @example Basic usage - Filter by cell value
+ * ```tsx
+ * cellContextMenuItem("filter-by-value", (ctx) => ({
+ *   label: `Filter by "${ctx.value}"`,
+ *   onClick: () => {
+ *     ctx.column.setFilterValue(ctx.value);
+ *   },
+ * }))
+ * ```
+ *
+ * @example With visibility based on column type
+ * ```tsx
+ * cellContextMenuItem("copy-value", (ctx) => ({
+ *   label: "Copy value",
+ *   onClick: () => navigator.clipboard.writeText(String(ctx.value)),
+ *   visible: ctx.value != null,
+ * }))
+ * ```
+ */
+export function cellContextMenuItem<TData, TArgs = unknown>(
+  id: string,
+  factory: (
+    ctx: CellContextMenuItemContext<TData, TArgs>
+  ) => ContextMenuItemEntry
+): CellContextMenuItemFactory<TData, TArgs> {
+  return {
+    id,
+    create: factory,
+  };
+}
+
+// =============================================================================
+// Column Context Menu Factory
+// =============================================================================
+
+/**
+ * Helper function to create a column context menu item with full context access.
+ *
+ * The factory function receives context including the clicked column header,
  * table instance, and plugin configuration args.
  *
  * @param id - Unique identifier for the menu item
  * @param factory - Factory function that receives context and returns menu item entry
  *
- * @example Basic usage
+ * @example Basic usage - Hide column
  * ```tsx
- * contextMenuItem("copy-id", (ctx) => ({
- *   label: "Copy ID",
- *   onClick: () => navigator.clipboard.writeText(ctx.row.id),
+ * columnContextMenuItem("hide-column", (ctx) => ({
+ *   label: "Hide column",
+ *   onClick: () => {
+ *     ctx.column.toggleVisibility(false);
+ *   },
  * }))
  * ```
  *
- * @example With visibility and plugin args
+ * @example Sort column
  * ```tsx
- * contextMenuItem("delete", (ctx) => ({
- *   label: ctx.selectedRows.length > 1
- *     ? `Delete ${ctx.selectedRows.length} items`
- *     : "Delete",
+ * columnContextMenuItem("sort-asc", (ctx) => ({
+ *   label: "Sort ascending",
  *   onClick: () => {
- *     const targets = ctx.selectedRows.length > 0 ? ctx.selectedRows : [ctx.row];
- *     handleDelete(targets);
+ *     ctx.column.toggleSorting(false);
  *   },
- *   visible: ctx.pluginArgs.enableDelete,
- *   disabled: ctx.selectedRows.length === 0,
+ *   visible: ctx.column.getCanSort(),
  * }))
  * ```
  */
-export function contextMenuItem<TData, TArgs = unknown>(
+export function columnContextMenuItem<TData, TArgs = unknown>(
   id: string,
-  factory: (ctx: ContextMenuItemContext<TData, TArgs>) => ContextMenuItemEntry
-): ContextMenuItemFactory<TData, TArgs> {
+  factory: (
+    ctx: ColumnContextMenuItemContext<TData, TArgs>
+  ) => ContextMenuItemEntry
+): ColumnContextMenuItemFactory<TData, TArgs> {
   return {
     id,
     create: factory,
