@@ -1,7 +1,11 @@
 import type { ReactNode } from "react";
 import type { z } from "zod";
 import type { Cell, Column, Row } from "@tanstack/react-table";
-import type { ContextMenuItemFactory } from "./contextMenuItem";
+import type {
+  ContextMenuItemFactory,
+  CellContextMenuItemFactory,
+  ColumnContextMenuItemFactory,
+} from "./contextMenuItem";
 
 // =============================================================================
 // Plugin Types
@@ -78,6 +82,16 @@ export interface InlineRowSlot<TData = unknown> {
 }
 
 /**
+ * Context menu items configuration for plugins
+ */
+export interface ContextMenuItemsSlot<TData = unknown> {
+  /** Cell context menu items - shown when right-clicking a cell */
+  cell?: CellContextMenuItemFactory<TData, unknown>[];
+  /** Column context menu items - shown when right-clicking a column header */
+  column?: ColumnContextMenuItemFactory<TData, unknown>[];
+}
+
+/**
  * Plugin slots configuration
  */
 export interface PluginSlots<TData = unknown> {
@@ -108,6 +122,7 @@ export interface SlotPlugin<TData = unknown> extends BasePlugin {
   contextMenu?: {
     items: ContextMenuItemFactory<TData, unknown>[];
   };
+  contextMenuItems?: ContextMenuItemsSlot<TData>;
 }
 
 /**
@@ -122,6 +137,7 @@ export interface SidepanelPlugin<TData = unknown> extends BasePlugin {
   contextMenu?: {
     items: ContextMenuItemFactory<TData, unknown>[];
   };
+  contextMenuItems?: ContextMenuItemsSlot<TData>;
 }
 
 /**
@@ -131,6 +147,7 @@ export interface ContextMenuOnlyPlugin<TData = unknown> extends BasePlugin {
   contextMenu: {
     items: ContextMenuItemFactory<TData, unknown>[];
   };
+  contextMenuItems?: ContextMenuItemsSlot<TData>;
 }
 
 /**
@@ -224,6 +241,11 @@ export interface DefineContextMenuPluginOptions<
   contextMenu: {
     items: ContextMenuItemFactory<TData, z.infer<TSchema>>[];
   };
+  /** Context menu items for cell and column */
+  contextMenuItems?: {
+    cell?: CellContextMenuItemFactory<TData, z.infer<TSchema>>[];
+    column?: ColumnContextMenuItemFactory<TData, z.infer<TSchema>>[];
+  };
 }
 
 /**
@@ -269,9 +291,14 @@ export interface DefineSlotPluginOptions<TData, TSchema extends z.ZodType>
   extends BasePluginOptions<TSchema> {
   /** Slot configurations */
   slots: DefinePluginSlots<TData, TSchema>;
-  /** Optional context menu configuration */
+  /** Optional context menu configuration (legacy row-level) */
   contextMenu?: {
     items: ContextMenuItemFactory<TData, z.infer<TSchema>>[];
+  };
+  /** Context menu items for cell and column */
+  contextMenuItems?: {
+    cell?: CellContextMenuItemFactory<TData, z.infer<TSchema>>[];
+    column?: ColumnContextMenuItemFactory<TData, z.infer<TSchema>>[];
   };
 }
 
@@ -416,6 +443,7 @@ export function definePlugin<TData, TSchema extends z.ZodType>(
           name: options.name,
           slots,
           contextMenu: slotOptions.contextMenu,
+          contextMenuItems: slotOptions.contextMenuItems,
         } as SlotPlugin<TData>;
       }
 
@@ -428,6 +456,7 @@ export function definePlugin<TData, TSchema extends z.ZodType>(
         id: options.id,
         name: options.name,
         contextMenu: contextMenuOptions.contextMenu,
+        contextMenuItems: contextMenuOptions.contextMenuItems,
       } as ContextMenuOnlyPlugin<TData>;
     },
   };

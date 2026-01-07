@@ -3,6 +3,7 @@ import { z } from "zod";
 import {
   definePlugin,
   usePluginContext,
+  columnContextMenuItem,
   type PluginContext,
 } from "@izumisy/seizen-datatable-react/plugin";
 
@@ -162,9 +163,7 @@ function VisibilityTab() {
                   : isDragging
                   ? "#f3f4f6"
                   : "#fff",
-                border: isDragOver
-                  ? "2px dashed #3b82f6"
-                  : "1px solid #e5e7eb",
+                border: isDragOver ? "2px dashed #3b82f6" : "1px solid #e5e7eb",
                 cursor: searchQuery ? "default" : "grab",
                 userSelect: "none",
                 transition: "all 0.15s ease",
@@ -260,10 +259,7 @@ function SorterTab() {
   // Add a new sorter
   const addSorter = useCallback(
     (columnKey: string) => {
-      const newSorting = [
-        ...sortingState,
-        { id: columnKey, desc: false },
-      ];
+      const newSorting = [...sortingState, { id: columnKey, desc: false }];
       table.setSorting(newSorting);
     },
     [sortingState, table]
@@ -621,5 +617,37 @@ export const ColumnControlPlugin = definePlugin({
       header: "Column Settings",
       render: ColumnControlRenderer,
     },
+  },
+  contextMenuItems: {
+    column: [
+      columnContextMenuItem("hide-column", (ctx) => ({
+        label: "Hide column",
+        onClick: () => {
+          ctx.column.toggleVisibility(false);
+        },
+        visible: ctx.column.getCanHide(),
+      })),
+      columnContextMenuItem("sort-asc", (ctx) => ({
+        label: "Sort ascending",
+        onClick: () => {
+          ctx.column.toggleSorting(false);
+        },
+        visible: ctx.column.getCanSort(),
+      })),
+      columnContextMenuItem("sort-desc", (ctx) => ({
+        label: "Sort descending",
+        onClick: () => {
+          ctx.column.toggleSorting(true);
+        },
+        visible: ctx.column.getCanSort(),
+      })),
+      columnContextMenuItem("clear-sort", (ctx) => ({
+        label: "Clear sort",
+        onClick: () => {
+          ctx.column.clearSorting();
+        },
+        visible: ctx.column.getCanSort() && ctx.column.getIsSorted() !== false,
+      })),
+    ],
   },
 });

@@ -23,6 +23,7 @@ export type {
   CellSlot,
   InlineRowSlot,
   PluginSlots,
+  ContextMenuItemsSlot,
   // Plugin types
   PluginPosition,
   SlotPlugin,
@@ -38,11 +39,19 @@ export type {
 } from "./definePlugin";
 
 // contextMenuItem
-export { contextMenuItem } from "./contextMenuItem";
+export {
+  contextMenuItem,
+  cellContextMenuItem,
+  columnContextMenuItem,
+} from "./contextMenuItem";
 export type {
   ContextMenuItemEntry,
   ContextMenuItemContext,
   ContextMenuItemFactory,
+  CellContextMenuItemContext,
+  CellContextMenuItemFactory,
+  ColumnContextMenuItemContext,
+  ColumnContextMenuItemFactory,
 } from "./contextMenuItem";
 
 // PluginContext

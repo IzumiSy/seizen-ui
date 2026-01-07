@@ -3,6 +3,7 @@ import { z } from "zod";
 import {
   definePlugin,
   usePluginContext,
+  cellContextMenuItem,
   DEFAULT_FILTER_OPERATORS,
   FILTER_OPERATOR_LABELS,
   type PluginContext,
@@ -754,5 +755,28 @@ export const FilterPlugin = definePlugin({
     header: {
       render: createGlobalSearchRenderer,
     },
+  },
+  contextMenuItems: {
+    cell: [
+      cellContextMenuItem("filter-by-value", (ctx) => {
+        const filterMeta = ctx.column.columnDef.meta as
+          | { filterType?: string }
+          | undefined;
+        const isFilterable = !!filterMeta?.filterType;
+        const displayValue =
+          ctx.value == null ? "(empty)" : String(ctx.value).slice(0, 20);
+        return {
+          label: `Filter by "${displayValue}"`,
+          onClick: () => {
+            // Set filter to equals operator with the cell value
+            ctx.column.setFilterValue({
+              operator: "equals",
+              value: String(ctx.value ?? ""),
+            });
+          },
+          visible: isFilterable && ctx.value != null,
+        };
+      }),
+    ],
   },
 });
