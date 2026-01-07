@@ -146,4 +146,9 @@ declare module "@tanstack/react-table" {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   interface ColumnMeta<TData extends RowData, TValue>
     extends ColumnFilterMeta {}
+
+  // Register custom filter function name for type-safe usage
+  interface FilterFns {
+    plugin: unknown;
+  }
 }
