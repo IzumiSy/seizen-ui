@@ -43,7 +43,7 @@ const AVAILABLE_PLUGINS = {
   "column-control": {
     name: "Column Control",
     description: "Toggle column visibility",
-    plugin: ColumnControlPlugin.configure({ width: 400 }),
+    plugin: ColumnControlPlugin.configure({ width: 450 }),
   },
   "file-export": {
     name: "File Export",
@@ -58,7 +58,7 @@ const AVAILABLE_PLUGINS = {
   filter: {
     name: "Filter",
     description: "Filter data by column values",
-    plugin: FilterPlugin.configure({ width: 320 }),
+    plugin: FilterPlugin.configure({ width: 450 }),
   },
   "all-slots-demo": {
     name: "All Slots Demo",
