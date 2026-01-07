@@ -11,6 +11,23 @@ import {
   type PluginColumnInfo,
 } from "@izumisy/seizen-datatable-react/plugin";
 
+// =============================================================================
+// Module Augmentation for EventBus
+// =============================================================================
+
+declare module "@izumisy/seizen-datatable-react/plugin" {
+  interface EventBusRegistry {
+    /**
+     * Request to add a filter from context menu.
+     * FilterPlugin subscribes to this to sync sidepanel state.
+     */
+    "filter:add-request": {
+      columnKey: string;
+      value: unknown;
+    };
+  }
+}
+
 /**
  * Schema for Filter plugin configuration
  */
@@ -290,7 +307,7 @@ function FilterItemRow({
 // =============================================================================
 
 function FilterPanel() {
-  const { columns, table } = usePluginContext();
+  const { columns, table, useEvent } = usePluginContext();
   const [filters, setFilters] = useState<FilterItem[]>([]);
 
   // Get columns that have filterMeta defined
@@ -304,7 +321,27 @@ function FilterPanel() {
     return filterableColumns.filter((col) => !filteredColumnKeys.has(col.key));
   }, [filterableColumns, filters]);
 
-  // Add a new filter
+  // Add a new filter with optional value (for context menu)
+  const addFilterWithValue = useCallback(
+    (columnKey: string, value?: unknown) => {
+      const column = filterableColumns.find((col) => col.key === columnKey);
+      if (!column) return;
+
+      const newFilter: FilterItem = {
+        id: generateFilterId(),
+        columnKey,
+        columnHeader: column.header,
+        operator: "equals",
+        value: value != null ? String(value) : "",
+      };
+
+      setFilters((prev) => [...prev, newFilter]);
+      return newFilter;
+    },
+    [filterableColumns]
+  );
+
+  // Add a new filter (without value)
   const addFilter = useCallback(
     (columnKey: string) => {
       const column = filterableColumns.find((col) => col.key === columnKey);
@@ -322,6 +359,31 @@ function FilterPanel() {
     },
     [filterableColumns]
   );
+
+  // Subscribe to filter:add-request event (from context menu)
+  useEvent("filter:add-request", (payload) => {
+    const { columnKey, value } = payload;
+    const newFilter = addFilterWithValue(columnKey, value);
+    if (newFilter && value != null) {
+      // Auto-apply when coming from context menu
+      const columnFilters = [
+        ...filters.filter((f) => f.columnKey !== columnKey),
+        newFilter,
+      ]
+        .filter((f) => {
+          if (!operatorRequiresValue(f.operator)) return true;
+          return f.value !== "";
+        })
+        .map((f) => ({
+          id: f.columnKey,
+          value: {
+            operator: f.operator,
+            value: f.value,
+          },
+        }));
+      table.setFilter(columnFilters);
+    }
+  });
 
   // Remove a filter
   const removeFilter = useCallback((filterId: string) => {
@@ -768,10 +830,10 @@ export const FilterPlugin = definePlugin({
         return {
           label: `Filter by "${displayValue}"`,
           onClick: () => {
-            // Set filter to equals operator with the cell value
-            ctx.column.setFilterValue({
-              operator: "equals",
-              value: String(ctx.value ?? ""),
+            // Emit event to sync with sidepanel
+            ctx.emit("filter:add-request", {
+              columnKey: ctx.column.id,
+              value: ctx.value,
             });
           },
           visible: isFilterable && ctx.value != null,

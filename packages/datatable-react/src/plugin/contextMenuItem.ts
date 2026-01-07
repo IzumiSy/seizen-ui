@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import type { Table, Cell, Column, Row } from "@tanstack/react-table";
+import type { EventBus } from "./useEventBus";
 
 // =============================================================================
 // Context Menu Types
@@ -43,6 +44,8 @@ export interface CellContextMenuItemContext<TData, TArgs = unknown> {
   table: Table<TData>;
   /** Plugin configuration args (validated by Zod schema) */
   pluginArgs: TArgs;
+  /** Emit an event to the EventBus */
+  emit: EventBus["emit"];
 }
 
 /**
@@ -69,6 +72,8 @@ export interface ColumnContextMenuItemContext<TData, TArgs = unknown> {
   table: Table<TData>;
   /** Plugin configuration args (validated by Zod schema) */
   pluginArgs: TArgs;
+  /** Emit an event to the EventBus */
+  emit: EventBus["emit"];
 }
 
 /**

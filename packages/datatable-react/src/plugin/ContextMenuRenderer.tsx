@@ -13,6 +13,7 @@ import type {
   CellContextMenuItemContext,
   ColumnContextMenuItemContext,
 } from "./contextMenuItem";
+import type { EventBus } from "./useEventBus";
 import * as styles from "./styles.css";
 
 // =============================================================================
@@ -77,6 +78,7 @@ interface ContextMenuProviderProps<TData> {
   table: Table<TData>;
   plugins: DataTablePlugin<TData>[];
   selectedRows: TData[];
+  emit: EventBus["emit"];
 }
 
 export function ContextMenuProvider<TData>({
@@ -84,6 +86,7 @@ export function ContextMenuProvider<TData>({
   table,
   plugins,
   selectedRows,
+  emit,
 }: ContextMenuProviderProps<TData>) {
   const [menuState, setMenuState] = useState<ContextMenuState<TData>>(null);
 
@@ -131,6 +134,7 @@ export function ContextMenuProvider<TData>({
           table={table}
           plugins={plugins}
           selectedRows={selectedRows}
+          emit={emit}
           onClose={closeMenu}
         />
       )}
@@ -147,6 +151,7 @@ interface ContextMenuRendererProps<TData> {
   table: Table<TData>;
   plugins: DataTablePlugin<TData>[];
   selectedRows: TData[];
+  emit: EventBus["emit"];
   onClose: () => void;
 }
 
@@ -160,6 +165,7 @@ function ContextMenuRenderer<TData>({
   table,
   plugins,
   selectedRows,
+  emit,
   onClose,
 }: ContextMenuRendererProps<TData>) {
   // Close menu on Escape key
@@ -204,6 +210,7 @@ function ContextMenuRenderer<TData>({
         selectedRows,
         table,
         pluginArgs: undefined,
+        emit,
       };
 
       const resolvedItems = cellItems
@@ -224,6 +231,7 @@ function ContextMenuRenderer<TData>({
         column: menuState.column,
         table,
         pluginArgs: undefined,
+        emit,
       };
 
       const resolvedItems = columnItems

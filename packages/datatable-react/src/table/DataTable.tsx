@@ -75,6 +75,7 @@ export function DataTable<TData>({
         table={tanstack}
         plugins={table.plugins}
         selectedRows={table.getSelectedRows()}
+        emit={table.eventBus.emit}
       >
         <DataTableInner
           table={table}
