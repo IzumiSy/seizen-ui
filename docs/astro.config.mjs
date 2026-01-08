@@ -3,6 +3,9 @@ import { defineConfig } from "astro/config";
 import starlight from "@astrojs/starlight";
 import react from "@astrojs/react";
 
+const isDev = process.env.NODE_ENV === "development";
+const demosUrl = isDev ? "http://localhost:5184" : "/demos/";
+
 // https://astro.build/config
 export default defineConfig({
   site: "https://izumisy.github.io",
@@ -38,6 +41,11 @@ export default defineConfig({
         {
           label: "Reference",
           autogenerate: { directory: "reference" },
+        },
+        {
+          label: "Demos",
+          link: demosUrl,
+          attrs: { target: "_blank" },
         },
       ],
     }),
