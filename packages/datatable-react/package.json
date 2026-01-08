@@ -19,7 +19,7 @@
   "scripts": {
     "build": "vite build",
     "test": "vitest",
-    "type-check": "tsc"
+    "type-check": "tsc -b"
   },
   "author": "IzumiSy",
   "license": "MIT",

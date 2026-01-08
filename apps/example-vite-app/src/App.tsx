@@ -5,17 +5,21 @@ import {
   type ColumnDef,
 } from "@izumisy/seizen-datatable-react";
 import { data, type Person } from "./data";
-import { PluginToggleList } from "./plugins/PluginToggle";
-import { RowDetailPlugin } from "./plugins/RowDetailPlugin";
+import { RowDetailPlugin } from "@izumisy/seizen-datatable-plugins/row-detail";
 import {
   FileExportPlugin,
   CsvExporter,
   JsonlExporter,
   TsvExporter,
-} from "./plugins/FileExportPlugin";
-import { ColumnControlPlugin } from "./plugins/ColumnControlPlugin";
-import { FilterPlugin } from "./plugins/FilterPlugin";
-import { AllSlotsDemo } from "./plugins/AllSlotsPlugin";
+} from "@izumisy/seizen-datatable-plugins/file-export";
+import { ColumnControlPlugin } from "@izumisy/seizen-datatable-plugins/column-control";
+import { FilterPlugin } from "@izumisy/seizen-datatable-plugins/filter";
+import { AllSlotsDemo } from "@izumisy/seizen-datatable-plugins/all-slots-demo";
+import { PluginToggleList } from "./plugins/PluginToggle";
+import {
+  type PluginRegistry,
+  usePluginToggle,
+} from "./plugins/usePluginToggle";
 import {
   StatusBadge,
   DepartmentBadge,
@@ -25,10 +29,6 @@ import {
   DateCell,
   LocationCell,
 } from "./components/cells";
-import {
-  type PluginRegistry,
-  usePluginToggle,
-} from "./plugins/usePluginToggle";
 
 // =============================================================================
 // Plugin Definitions

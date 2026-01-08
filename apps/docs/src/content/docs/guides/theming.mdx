@@ -1,0 +1,120 @@
+---
+title: Theming
+description: Customize the appearance of Seizen DataTable with CSS variables.
+---
+
+## CSS Variables
+
+Customize the appearance by defining CSS variables. All variables have sensible defaults.
+
+```css
+:root {
+  /* Colors */
+  --szui-color-text: #1f2937;
+  --szui-color-bg: #ffffff;
+  --szui-header-bg: #f9fafb;
+  --szui-header-color: #6b7280;
+  --szui-border-color: #e5e7eb;
+  --szui-row-hover-bg: #f3f4f6;
+  --szui-row-selected-bg: #eff6ff;
+
+  /* Typography */
+  --szui-font-family: system-ui, -apple-system, sans-serif;
+  --szui-font-size: 14px;
+  --szui-line-height: 1.5;
+  --szui-header-font-size: 12px;
+  --szui-header-font-weight: 600;
+
+  /* Spacing */
+  --szui-cell-padding-x: 12px;
+  --szui-cell-padding-y: 10px;
+
+  /* Border */
+  --szui-border-width: 1px;
+  --szui-border-radius: 8px;
+}
+```
+
+## Dark Mode
+
+Use CSS media queries or class-based dark mode to provide a dark theme:
+
+### Media Query (System Preference)
+
+```css
+@media (prefers-color-scheme: dark) {
+  :root {
+    --szui-color-text: #f9fafb;
+    --szui-color-bg: #111827;
+    --szui-header-bg: #1f2937;
+    --szui-header-color: #9ca3af;
+    --szui-border-color: #374151;
+    --szui-row-hover-bg: #374151;
+    --szui-row-selected-bg: #1e3a5f;
+  }
+}
+```
+
+### Class-based (Manual Toggle)
+
+```css
+.dark {
+  --szui-color-text: #f9fafb;
+  --szui-color-bg: #111827;
+  --szui-header-bg: #1f2937;
+  --szui-header-color: #9ca3af;
+  --szui-border-color: #374151;
+  --szui-row-hover-bg: #374151;
+  --szui-row-selected-bg: #1e3a5f;
+}
+```
+
+## Custom Table Rendering
+
+For full control over table rendering, access the TanStack Table instance directly:
+
+```tsx
+import { useDataTable, flexRender, type ColumnDef } from "@izumisy/seizen-datatable-react";
+
+function CustomTable<TData>({ 
+  data, 
+  columns 
+}: { 
+  data: TData[]; 
+  columns: ColumnDef<TData>[] 
+}) {
+  const table = useDataTable({ data, columns });
+  const tanstack = table._tanstackTable;
+
+  return (
+    <table>
+      <thead>
+        {tanstack.getHeaderGroups().map((headerGroup) => (
+          <tr key={headerGroup.id}>
+            {headerGroup.headers.map((header) => (
+              <th key={header.id}>
+                {header.isPlaceholder
+                  ? null
+                  : flexRender(header.column.columnDef.header, header.getContext())}
+              </th>
+            ))}
+          </tr>
+        ))}
+      </thead>
+      <tbody>
+        {tanstack.getRowModel().rows.map((row) => (
+          <tr key={row.id}>
+            {row.getVisibleCells().map((cell) => (
+              <td key={cell.id}>
+                {flexRender(cell.column.columnDef.cell, cell.getContext())}
+              </td>
+            ))}
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  );
+}
+```
+
+This approach gives you complete control over the HTML structure while still leveraging the DataTable's state management and plugin system.
