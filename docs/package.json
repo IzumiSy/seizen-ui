@@ -3,13 +3,14 @@
   "type": "module",
   "version": "0.0.1",
   "scripts": {
-    "dev": "pnpm run build:demos && concurrently \"pnpm run dev:demos:watch\" \"pnpm run dev:demos:preview\" \"pnpm run dev:docs\"",
+    "dev": "pnpm run build:demos && concurrently \"pnpm run build:demos --watch\" \"pnpm run preview:demos\" \"pnpm run dev:docs\"",
     "dev:docs": "astro dev",
-    "dev:demos:watch": "pnpm run build:demos --watch",
-    "dev:demos:preview": "vite preview --config demos/vite.config.ts --port 5184",
+    "dev:demos": "vite dev --config demos/vite.config.ts",
+    "preview:demos": "vite preview --config demos/vite.config.ts --port 5184",
     "start": "astro dev",
     "build": "astro build && pnpm run build:demos",
     "build:demos": "vite build --config demos/vite.config.ts",
+    "build:demos:watch": "pnpm run build:demos --watch",
     "preview": "astro preview",
     "astro": "astro",
     "type-check": "tsc -b"
