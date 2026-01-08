@@ -14,8 +14,7 @@ export function DemoPreview({ demo, height = 400 }: DemoPreviewProps) {
       style={{
         width: "100%",
         height: `${height}px`,
-        border: "1px solid var(--sl-color-gray-5)",
-        borderRadius: "8px",
+        border: "none",
         marginBlock: "1rem",
       }}
     />

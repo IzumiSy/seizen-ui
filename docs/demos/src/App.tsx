@@ -31,7 +31,7 @@ export function App() {
   const DemoComponent = demos[demoName];
 
   return (
-    <div style={{ padding: "1rem" }}>
+    <div>
       <DemoComponent />
     </div>
   );
