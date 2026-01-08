@@ -15,6 +15,7 @@
       "@components/*": ["src/components/*"]
     },
     "noEmit": true,
+    "skipLibCheck": true,
     "strict": true,
     "verbatimModuleSyntax": true,
     "noUnusedLocals": true,

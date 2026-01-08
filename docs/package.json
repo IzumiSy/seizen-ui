@@ -12,9 +12,10 @@
     "build": "astro build && pnpm run build:demos",
     "build:demos": "vite build --config demos/vite.config.ts",
     "build:demos:watch": "pnpm run build:demos --watch",
-    "type-check": "tsc -b"
+    "type-check": "node_modules/.bin/astro-check"
   },
   "dependencies": {
+    "@astrojs/check": "^0.9.6",
     "@astrojs/react": "^4.4.2",
     "@astrojs/starlight": "^0.37.2",
     "@izumisy/seizen-datatable-plugins": "workspace:*",
@@ -32,6 +33,7 @@
     "vite": "^6.3.5"
   },
   "devDependencies": {
-    "@vanilla-extract/vite-plugin": "^4.0.20"
+    "@vanilla-extract/vite-plugin": "^4.0.20",
+    "typescript": "5.8.2"
   }
 }
