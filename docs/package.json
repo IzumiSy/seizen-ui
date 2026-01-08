@@ -1,0 +1,39 @@
+{
+  "name": "docs",
+  "type": "module",
+  "version": "0.0.1",
+  "scripts": {
+    "dev": "pnpm run build:demos && concurrently \"pnpm run build:demos --watch\" \"pnpm run preview:demos\" \"pnpm run dev:docs\"",
+    "dev:docs": "astro dev",
+    "dev:demos": "vite dev --config demos/vite.config.ts",
+    "start": "astro dev",
+    "preview": "astro preview",
+    "preview:demos": "vite preview --config demos/vite.config.ts --port 5184",
+    "build": "astro build && pnpm run build:demos",
+    "build:demos": "vite build --config demos/vite.config.ts",
+    "build:demos:watch": "pnpm run build:demos --watch",
+    "type-check": "node_modules/.bin/astro-check"
+  },
+  "dependencies": {
+    "@astrojs/check": "^0.9.6",
+    "@astrojs/react": "^4.4.2",
+    "@astrojs/starlight": "^0.37.2",
+    "@izumisy/seizen-datatable-plugins": "workspace:*",
+    "@izumisy/seizen-datatable-react": "workspace:*",
+    "@types/react": "^19.2.7",
+    "@types/react-dom": "^19.2.3",
+    "@vanilla-extract/css": "^1.18.0",
+    "@vitejs/plugin-react": "^4.3.4",
+    "astro": "^5.6.1",
+    "concurrently": "^9.1.2",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3",
+    "react-router": "^7.12.0",
+    "sharp": "^0.34.2",
+    "vite": "^6.3.5"
+  },
+  "devDependencies": {
+    "@vanilla-extract/vite-plugin": "^4.0.20",
+    "typescript": "5.8.2"
+  }
+}

@@ -1,0 +1,12 @@
+/* Starlightのコンテンツ幅をカスタマイズ */
+:root {
+  --sl-content-width: 50rem; /* デフォルトは40rem */
+  --sl-content-pad-x: 1.5rem;
+}
+
+/* より広いコンテンツ幅が必要な場合 */
+@media (min-width: 72rem) {
+  :root {
+    --sl-content-width: 60rem;
+  }
+}

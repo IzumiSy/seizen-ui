@@ -1,0 +1,1 @@
+export { RowDetailPlugin } from "./plugin";

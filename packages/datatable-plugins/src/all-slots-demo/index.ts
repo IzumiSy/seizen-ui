@@ -1,0 +1,1 @@
+export { AllSlotsDemo } from "./plugin";

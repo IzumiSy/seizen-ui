@@ -1,0 +1,209 @@
+---
+title: Data Adapter
+description: Connect your DataTable to any backend with Data Adapters.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+## Overview
+
+Enterprise applications fetch data from various sources: GraphQL APIs, REST endpoints, direct SQL queries, etc. The DataAdapter abstraction allows you to:
+
+- Swap data sources without changing table logic
+- Implement pagination, sorting, and filtering at the protocol level
+- Handle caching and optimistic updates consistently
+
+## Interface
+
+```typescript
+interface DataAdapterOptions<TData, TFilter = unknown> {
+  /**
+   * Initial page size
+   */
+  pageSize?: number;
+
+  /**
+   * Initial filter state
+   */
+  initialFilter?: TFilter;
+
+  /**
+   * Pagination mode
+   * - "offset": Traditional page-based (page index + page size)
+   * - "cursor": Cursor-based (first/after, last/before)
+   * @default "offset"
+   */
+  paginationMode?: "offset" | "cursor";
+}
+```
+
+## Pagination States
+
+### Offset Pagination
+
+```typescript
+interface OffsetPaginationState {
+  mode: "offset";
+  pageIndex: number;  // Current page index (0-based)
+  pageSize: number;   // Current page size
+}
+```
+
+### Cursor Pagination
+
+```typescript
+interface CursorPaginationState {
+  mode: "cursor";
+  pageSize: number;
+  startCursor: string | null;
+  endCursor: string | null;
+  hasNextPage: boolean;
+  hasPreviousPage: boolean;
+}
+```
+
+### Pagination Mode Comparison
+
+| Feature | Offset Mode | Cursor Mode |
+|---------|-------------|-------------|
+| Jump to page | ✅ `goToPage(n)` | ❌ Not supported |
+| Next/Previous | ✅ `nextPage()` / `previousPage()` | ✅ `nextPage()` / `previousPage()` |
+| Total count | ✅ Always available | ⚠️ May be null |
+| Performance | ⚠️ Slower on large datasets | ✅ Consistent performance |
+| Real-time data | ⚠️ May skip/duplicate on changes | ✅ Stable cursor position |
+
+## Defining Custom Adapters
+
+Use `defineDataAdapter` to create custom adapters:
+
+```typescript
+import { defineDataAdapter } from "@izumisy/seizen-datatable-react";
+
+const MyCustomAdapter = defineDataAdapter({
+  id: "my-custom-adapter",
+
+  // Initialize adapter state
+  initialState: {
+    data: [],
+    totalCount: 0,
+    isLoading: false,
+    error: null,
+    pageIndex: 0,
+    pageSize: 10,
+  },
+
+  // Fetch implementation
+  fetch: async (state, options) => {
+    const response = await myApi.getItems({
+      page: state.pageIndex,
+      limit: state.pageSize,
+    });
+    return {
+      data: response.items,
+      totalCount: response.total,
+    };
+  },
+});
+```
+
+## Built-in Adapters
+
+### GraphQL Adapter
+
+```typescript
+import { GraphQLAdapter } from "@izumisy/seizen-datatable-adapter-graphql";
+
+const usersAdapter = GraphQLAdapter.configure({
+  client: apolloClient,
+  query: GET_USERS_QUERY,
+  variables: (state) => ({
+    first: state.pageSize,
+    offset: state.pageIndex * state.pageSize,
+    filter: state.filter,
+    orderBy: state.sorting,
+  }),
+  transform: (data) => ({
+    data: data.users.nodes,
+    totalCount: data.users.totalCount,
+  }),
+});
+```
+
+### REST/OpenAPI Adapter
+
+```typescript
+import { RESTAdapter } from "@izumisy/seizen-datatable-adapter-rest";
+
+const usersAdapter = RESTAdapter.configure({
+  baseUrl: "/api/users",
+  buildUrl: (state) => ({
+    params: {
+      page: state.pageIndex,
+      limit: state.pageSize,
+      sort: state.sorting?.[0]?.id,
+      order: state.sorting?.[0]?.desc ? "desc" : "asc",
+    },
+  }),
+  transform: (response) => ({
+    data: response.items,
+    totalCount: response.total,
+  }),
+});
+```
+
+## Adapter API
+
+The adapter instance provides a framework-agnostic API:
+
+```typescript
+const usersAdapter = GraphQLAdapter.configure({
+  client: apolloClient,
+  query: GET_USERS_QUERY,
+  // ...
+});
+
+// State (readonly)
+usersAdapter.state.data;        // TData[]
+usersAdapter.state.totalCount;  // number
+usersAdapter.state.isLoading;   // boolean
+usersAdapter.state.error;       // Error | null
+usersAdapter.state.pageIndex;   // number
+usersAdapter.state.pageSize;    // number
+
+// Actions
+usersAdapter.fetch();                    // Fetch data
+usersAdapter.refetch();                  // Refetch current page
+usersAdapter.setPageIndex(2);            // Go to page
+usersAdapter.setPageSize(20);            // Change page size
+usersAdapter.setFilter({ status: "active" });  // Set filter
+usersAdapter.setSorting([{ id: "name", desc: false }]);  // Set sorting
+```
+
+## Usage with DataTable
+
+```tsx
+import { useAdapter } from "@izumisy/seizen-datatable-react";
+
+const usersAdapter = GraphQLAdapter.configure({
+  client: apolloClient,
+  query: GET_USERS_QUERY,
+  // ...
+});
+
+function UsersTable() {
+  // useAdapter subscribes to state changes and triggers re-render
+  const { state, actions } = useAdapter(usersAdapter);
+
+  return (
+    <DataTable
+      data={state.data}
+      columns={columns}
+      isLoading={state.isLoading}
+    />
+  );
+}
+```
+
+<Aside type="note">
+  Data adapters are optional. For static data or client-side filtering, you can pass data directly to `useDataTable`.
+</Aside>
