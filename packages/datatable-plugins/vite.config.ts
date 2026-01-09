@@ -5,7 +5,9 @@ import tsconfigPaths from "vite-tsconfig-paths";
 
 export default defineConfig({
   plugins: [
-    tsconfigPaths(),
+    tsconfigPaths({
+      projects: ["./tsconfig.json"],
+    }),
     externalizeDeps(),
     dts({
       insertTypesEntry: true,

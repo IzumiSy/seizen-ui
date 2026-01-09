@@ -7,7 +7,9 @@ import cssInjectedByJsPlugin from "vite-plugin-css-injected-by-js";
 
 export default defineConfig({
   plugins: [
-    tsconfigPaths(),
+    tsconfigPaths({
+      projects: ["./tsconfig.json"],
+    }),
     vanillaExtractPlugin(),
     externalizeDeps(),
     cssInjectedByJsPlugin({
